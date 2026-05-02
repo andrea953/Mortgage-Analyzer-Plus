@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PaymentFrequency } from "@/lib/mortgage";
+import { PaymentFrequency, LumpSumType } from "@/lib/mortgage";
+import { Button } from "@/components/ui/button";
 
 type ScenarioFormProps = {
   state: ScenarioState;
@@ -44,7 +45,9 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
         typeof v.amortizationYears === "number" && !isNaN(v.amortizationYears) &&
         typeof v.amortizationMonths === "number" && !isNaN(v.amortizationMonths) &&
         typeof v.termYears === "number" && !isNaN(v.termYears) &&
-        typeof v.extraPerPeriod === "number" && !isNaN(v.extraPerPeriod)
+        typeof v.extraPerPeriod === "number" && !isNaN(v.extraPerPeriod) &&
+      typeof v.lumpSumValue === "number" && !isNaN(v.lumpSumValue) &&
+      (v.lumpSumType === "amount" || v.lumpSumType === "percent")
       ) {
         onChange(v as ScenarioState);
       }
@@ -199,6 +202,62 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
               />
             </div>
           </div>
+        </div>
+
+        {/* Annual Lump Sum Prepayment */}
+        <div className="space-y-3 pt-4 border-t border-border">
+          <div className="flex justify-between items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <Label htmlFor="lumpSumValue">Annual Lump Sum</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Applied at each anniversary
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="inline-flex rounded-md border border-border overflow-hidden">
+                <Button
+                  type="button"
+                  variant={values.lumpSumType === "amount" ? "default" : "ghost"}
+                  size="sm"
+                  className="rounded-none h-9 px-3 text-xs font-medium"
+                  onClick={() => setValue("lumpSumType", "amount" as LumpSumType)}
+                  aria-pressed={values.lumpSumType === "amount"}
+                >
+                  $
+                </Button>
+                <Button
+                  type="button"
+                  variant={values.lumpSumType === "percent" ? "default" : "ghost"}
+                  size="sm"
+                  className="rounded-none h-9 px-3 text-xs font-medium border-l border-border"
+                  onClick={() => setValue("lumpSumType", "percent" as LumpSumType)}
+                  aria-pressed={values.lumpSumType === "percent"}
+                >
+                  %
+                </Button>
+              </div>
+              <div className="relative w-28">
+                {values.lumpSumType === "amount" ? (
+                  <span className="absolute left-3 top-1.5 text-muted-foreground pointer-events-none">$</span>
+                ) : (
+                  <span className="absolute right-3 top-1.5 text-muted-foreground pointer-events-none">%</span>
+                )}
+                <Input
+                  id="lumpSumValue"
+                  type="number"
+                  step={values.lumpSumType === "percent" ? "0.1" : "100"}
+                  min={0}
+                  className={values.lumpSumType === "amount" ? "pl-7 text-right" : "pr-7 text-right"}
+                  {...register("lumpSumValue", { valueAsNumber: true })}
+                />
+              </div>
+            </div>
+          </div>
+          {values.lumpSumValue > 0 && values.lumpSumType === "percent" && (
+            <p className="text-xs text-muted-foreground">
+              {values.lumpSumValue}% of original principal = ${(values.principal * values.lumpSumValue / 100).toLocaleString("en-CA", { maximumFractionDigits: 0 })} per year
+            </p>
+          )}
         </div>
 
       </CardContent>

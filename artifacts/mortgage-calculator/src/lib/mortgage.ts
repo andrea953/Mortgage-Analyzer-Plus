@@ -77,6 +77,8 @@ export function computePayment({
   return (principal * rate) / (1 - Math.pow(1 + rate, -totalPeriods));
 }
 
+export type LumpSumType = "amount" | "percent";
+
 export type ScheduleRow = {
   n: number;
   date: Date;
@@ -85,6 +87,7 @@ export type ScheduleRow = {
   interest: number;
   principal: number;
   extra: number;
+  lumpSum: number;
   endingBalance: number;
 };
 
@@ -94,6 +97,8 @@ export function buildSchedule({
   amortizationMonths,
   frequency,
   extraPerPeriod,
+  lumpSumValue = 0,
+  lumpSumType = "amount",
   startDate = new Date(),
 }: {
   principal: number;
@@ -101,12 +106,21 @@ export function buildSchedule({
   amortizationMonths: number;
   frequency: PaymentFrequency;
   extraPerPeriod: number;
+  lumpSumValue?: number;
+  lumpSumType?: LumpSumType;
   startDate?: Date;
 }): ScheduleRow[] {
   const schedule: ScheduleRow[] = [];
   const rate = getPerPeriodRate(annualRatePct, frequency);
   const regularPayment = computePayment({ principal, annualRatePct, amortizationMonths, frequency });
-  
+
+  const periodsPerYear = frequencyPeriods[frequency];
+  const annualLumpAmount = !lumpSumValue || lumpSumValue <= 0
+    ? 0
+    : lumpSumType === "percent"
+      ? principal * (lumpSumValue / 100)
+      : lumpSumValue;
+
   let balance = principal;
   let n = 1;
   let currentDate = new Date(startDate);
@@ -130,29 +144,40 @@ export function buildSchedule({
     let payment = regularPayment;
     let extra = extraPerPeriod;
 
-    if (balance + interest <= payment + extra) {
+    // Cap payment if it would overpay
+    if (balance + interest <= payment) {
       payment = balance + interest;
       extra = 0;
     }
 
-    let principalPaid = payment - interest;
-    
-    if (balance - principalPaid <= extra) {
-      extra = balance - principalPaid;
+    let principalFromPayment = payment - interest;
+    let remainingAfterPayment = balance - principalFromPayment;
+
+    // Cap recurring extra
+    if (remainingAfterPayment <= extra) {
+      extra = Math.max(0, remainingAfterPayment);
     }
-    
-    principalPaid += extra;
-    
-    const endingBalance = Math.max(0, balance - principalPaid);
+    remainingAfterPayment -= extra;
+
+    // Annual lump sum: applied on the last payment of each completed year
+    let lumpSum = 0;
+    const isAnniversary = annualLumpAmount > 0 && n % periodsPerYear === 0;
+    if (isAnniversary && remainingAfterPayment > 0) {
+      lumpSum = Math.min(annualLumpAmount, remainingAfterPayment);
+    }
+
+    const totalPrincipalApplied = principalFromPayment + extra + lumpSum;
+    const endingBalance = Math.max(0, balance - totalPrincipalApplied);
 
     schedule.push({
       n,
       date: new Date(currentDate),
       beginningBalance: balance,
-      payment: payment + extra,
+      payment: payment + extra + lumpSum,
       interest,
-      principal: principalPaid - extra,
+      principal: principalFromPayment,
       extra,
+      lumpSum,
       endingBalance,
     });
 
@@ -172,24 +197,32 @@ export function summarize(schedule: ScheduleRow[], termYears: number) {
       totalInterest: 0,
       termInterest: 0,
       termEndingBalance: 0,
+      renewalDate: new Date(),
     };
   }
 
-  const regularPayment = schedule[0].payment - schedule[0].extra;
-  const totalPayment = schedule[0].payment;
+  const regularPayment = schedule[0].payment - schedule[0].extra - schedule[0].lumpSum;
+  const totalPayment = schedule[0].payment - schedule[0].lumpSum;
   const payoffMonths = Math.ceil(
     (schedule[schedule.length - 1].date.getTime() - schedule[0].date.getTime()) / 
     (1000 * 60 * 60 * 24 * 30.44)
   );
   
   const totalInterest = schedule.reduce((sum, row) => sum + row.interest, 0);
-  
-  const termDate = new Date(schedule[0].date);
-  termDate.setFullYear(termDate.getFullYear() + termYears);
-  
-  const termRows = schedule.filter(row => row.date <= termDate);
+
+  // Renewal date = start of loan + term years. We use the date BEFORE the first
+  // payment as the loan start (the schedule advances the date before recording).
+  const loanStart = new Date(schedule[0].date);
+  // Roll back one period to estimate the loan start date
+  // (schedule[0].date is the date of the first payment)
+  const renewalDate = new Date(loanStart);
+  renewalDate.setFullYear(renewalDate.getFullYear() + termYears);
+
+  const termRows = schedule.filter(row => row.date <= renewalDate);
   const termInterest = termRows.reduce((sum, row) => sum + row.interest, 0);
-  const termEndingBalance = termRows.length > 0 ? termRows[termRows.length - 1].endingBalance : schedule[0].beginningBalance;
+  const termEndingBalance = termRows.length > 0
+    ? termRows[termRows.length - 1].endingBalance
+    : schedule[0].beginningBalance;
 
   return {
     regularPayment,
@@ -198,5 +231,6 @@ export function summarize(schedule: ScheduleRow[], termYears: number) {
     totalInterest,
     termInterest,
     termEndingBalance,
+    renewalDate,
   };
 }

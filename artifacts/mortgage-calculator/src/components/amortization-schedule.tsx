@@ -27,9 +27,9 @@ export function AmortizationSchedule({ schedule }: AmortizationScheduleProps) {
   };
 
   const handleExportCsv = () => {
-    const headers = ["Payment No", "Date", "Beginning Balance", "Payment", "Interest", "Principal", "Extra", "Ending Balance"];
+    const headers = ["Payment No", "Date", "Beginning Balance", "Payment", "Interest", "Principal", "Extra", "Lump Sum", "Ending Balance"];
     const csvRows = [headers.join(",")];
-    
+
     schedule.forEach((row) => {
       csvRows.push(
         [
@@ -40,6 +40,7 @@ export function AmortizationSchedule({ schedule }: AmortizationScheduleProps) {
           row.interest.toFixed(2),
           row.principal.toFixed(2),
           row.extra.toFixed(2),
+          row.lumpSum.toFixed(2),
           row.endingBalance.toFixed(2),
         ].join(",")
       );
@@ -95,7 +96,8 @@ export function AmortizationSchedule({ schedule }: AmortizationScheduleProps) {
                   const year = parseInt(yearStr);
                   const isExpanded = expandedYears[year];
                   const totalInterest = rows.reduce((sum, r) => sum + r.interest, 0);
-                  const totalPrincipal = rows.reduce((sum, r) => sum + r.principal + r.extra, 0);
+                  const totalPrincipal = rows.reduce((sum, r) => sum + r.principal + r.extra + r.lumpSum, 0);
+                  const yearLumpSum = rows.reduce((sum, r) => sum + r.lumpSum, 0);
                   const endBalance = rows[rows.length - 1].endingBalance;
 
                   return (
@@ -109,6 +111,11 @@ export function AmortizationSchedule({ schedule }: AmortizationScheduleProps) {
                           <div className="flex items-center gap-2">
                             {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                             {year}
+                            {yearLumpSum > 0 && (
+                              <span className="ml-1 text-[10px] font-medium uppercase tracking-wide bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                                +{formatCurrency(yearLumpSum)} lump
+                              </span>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className="text-right text-muted-foreground text-sm">--</TableCell>
@@ -120,13 +127,22 @@ export function AmortizationSchedule({ schedule }: AmortizationScheduleProps) {
 
                       {/* Detailed Rows */}
                       {isExpanded && rows.map((row) => (
-                        <TableRow key={row.n} className="text-sm">
-                          <TableCell>{row.n}</TableCell>
+                        <TableRow key={row.n} className={`text-sm ${row.lumpSum > 0 ? "bg-primary/5" : ""}`}>
+                          <TableCell>
+                            <div className="flex items-center gap-1.5">
+                              {row.n}
+                              {row.lumpSum > 0 && (
+                                <span className="text-[9px] font-semibold uppercase tracking-wide bg-primary/15 text-primary px-1 py-0.5 rounded">
+                                  Lump
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
                           <TableCell>{row.date.toLocaleDateString()}</TableCell>
                           <TableCell className="text-right">{formatCurrency(row.beginningBalance)}</TableCell>
                           <TableCell className="text-right">{formatCurrency(row.payment)}</TableCell>
                           <TableCell className="text-right text-destructive">{formatCurrency(row.interest)}</TableCell>
-                          <TableCell className="text-right text-primary">{formatCurrency(row.principal + row.extra)}</TableCell>
+                          <TableCell className="text-right text-primary">{formatCurrency(row.principal + row.extra + row.lumpSum)}</TableCell>
                           <TableCell className="text-right">{formatCurrency(row.endingBalance)}</TableCell>
                         </TableRow>
                       ))}

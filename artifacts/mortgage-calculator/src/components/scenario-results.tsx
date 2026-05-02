@@ -12,9 +12,13 @@ type ScenarioResultsProps = {
     totalInterest: number;
     termInterest: number;
     termEndingBalance: number;
+    renewalDate: Date;
   };
   scenario: ScenarioState;
 };
+
+const formatRenewalDate = (d: Date) =>
+  d.toLocaleDateString("en-CA", { month: "short", year: "numeric" });
 
 export function ScenarioResults({ summary, scenario }: ScenarioResultsProps) {
   const payoffYears = Math.floor(summary.payoffMonths / 12);
@@ -68,13 +72,36 @@ export function ScenarioResults({ summary, scenario }: ScenarioResultsProps) {
 
         <Card className="bg-card">
           <CardContent className="p-4">
-            <h4 className="text-xs text-muted-foreground font-medium mb-1">Term End Balance</h4>
+            <h4 className="text-xs text-muted-foreground font-medium mb-1">Balance at Renewal</h4>
             <div className="text-lg font-semibold text-foreground">
               <AnimatedNumber value={summary.termEndingBalance} format={formatCurrency} />
             </div>
           </CardContent>
         </Card>
       </div>
+
+      <Card className="bg-gradient-to-br from-card to-muted/30 border-border">
+        <CardContent className="p-4 flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h4 className="text-xs text-muted-foreground font-medium mb-1">Renewal Date</h4>
+            <div className="text-lg font-semibold text-foreground tracking-tight">
+              {formatRenewalDate(summary.renewalDate)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              End of {scenario.termYears}-year term
+            </p>
+          </div>
+          <div className="text-right shrink-0">
+            <h4 className="text-xs text-muted-foreground font-medium mb-1">Projected Principal</h4>
+            <div className="text-lg font-semibold text-primary">
+              <AnimatedNumber value={summary.termEndingBalance} format={formatCurrency} />
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {Math.round((summary.termEndingBalance / scenario.principal) * 100)}% of original
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

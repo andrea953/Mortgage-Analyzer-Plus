@@ -8,7 +8,7 @@ import { ScenarioForm } from "@/components/scenario-form";
 import { ScenarioResults } from "@/components/scenario-results";
 import { AmortizationChart } from "@/components/amortization-chart";
 import { AmortizationSchedule } from "@/components/amortization-schedule";
-import { buildSchedule, summarize, PaymentFrequency } from "@/lib/mortgage";
+import { buildSchedule, summarize, PaymentFrequency, LumpSumType } from "@/lib/mortgage";
 import { ScenarioComparison } from "@/components/scenario-comparison";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -20,6 +20,8 @@ export type ScenarioState = {
   termYears: number;
   frequency: PaymentFrequency;
   extraPerPeriod: number;
+  lumpSumValue: number;
+  lumpSumType: LumpSumType;
 };
 
 const defaultScenario: ScenarioState = {
@@ -30,6 +32,8 @@ const defaultScenario: ScenarioState = {
   termYears: 5,
   frequency: "Monthly",
   extraPerPeriod: 0,
+  lumpSumValue: 0,
+  lumpSumType: "amount",
 };
 
 export default function Calculator() {
@@ -48,6 +52,8 @@ export default function Calculator() {
     amortizationMonths: scenarioA.amortizationYears * 12 + scenarioA.amortizationMonths,
     frequency: scenarioA.frequency,
     extraPerPeriod: scenarioA.extraPerPeriod,
+    lumpSumValue: scenarioA.lumpSumValue,
+    lumpSumType: scenarioA.lumpSumType,
   }), [scenarioA]);
 
   const scheduleB = useMemo(() => buildSchedule({
@@ -56,6 +62,8 @@ export default function Calculator() {
     amortizationMonths: scenarioB.amortizationYears * 12 + scenarioB.amortizationMonths,
     frequency: scenarioB.frequency,
     extraPerPeriod: scenarioB.extraPerPeriod,
+    lumpSumValue: scenarioB.lumpSumValue,
+    lumpSumType: scenarioB.lumpSumType,
   }), [scenarioB]);
 
   const summaryA = useMemo(() => summarize(scheduleA, scenarioA.termYears), [scheduleA, scenarioA.termYears]);
