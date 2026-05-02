@@ -58,7 +58,7 @@ const defaultScenario: ScenarioState = {
 
 export default function Calculator() {
   const { theme, setTheme } = useTheme();
-  const [tab, setTab] = useState<"calculator" | "renewal">("renewal");
+  const [tab, setTab] = useState<"calculator" | "renewal">("calculator");
   const [isCompare, setIsCompare] = useState(false);
   const [scenarioA, setScenarioA] = useState<ScenarioState>({ ...defaultScenario });
   const [scenarioB, setScenarioB] = useState<ScenarioState>({ 
