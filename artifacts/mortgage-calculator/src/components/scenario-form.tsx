@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { ScenarioState, BalanceMode } from "@/pages/Calculator";
+import { ScenarioState, BalanceMode, RateType } from "@/pages/Calculator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -49,6 +49,9 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
       typeof v.lumpSumValue === "number" && !isNaN(v.lumpSumValue) &&
       (v.lumpSumType === "amount" || v.lumpSumType === "percent") &&
       (v.mode === "new" || v.mode === "current") &&
+      (v.rateType === "fixed" || v.rateType === "variable") &&
+      typeof v.primeRatePct === "number" && !isNaN(v.primeRatePct) &&
+      typeof v.spreadPct === "number" && !isNaN(v.spreadPct) &&
       typeof v.termStartDate === "string" && v.termStartDate.length > 0
       ) {
         onChange(v as ScenarioState);
@@ -57,7 +60,34 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
     return () => sub.unsubscribe();
   }, [form, onChange]);
 
+  // Keep annualRatePct in sync with prime+spread when in variable mode
+  useEffect(() => {
+    if (values.rateType === "variable") {
+      const effective = Math.max(0, (values.primeRatePct ?? 0) + (values.spreadPct ?? 0));
+      const rounded = Math.round(effective * 100) / 100;
+      if (Math.abs(rounded - (values.annualRatePct ?? 0)) > 0.001) {
+        setValue("annualRatePct", rounded, { shouldDirty: true });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.rateType, values.primeRatePct, values.spreadPct]);
+
   const isCurrent = values.mode === "current";
+  const isVariable = values.rateType === "variable";
+  const effectiveVariableRate = Math.max(
+    0,
+    Math.round(((values.primeRatePct ?? 0) + (values.spreadPct ?? 0)) * 100) / 100,
+  );
+
+  const handleRateTypeChange = (next: RateType) => {
+    if (next === values.rateType) return;
+    if (next === "variable") {
+      // Preserve effective rate by deriving spread from current annual rate
+      const newSpread = Math.round(((values.annualRatePct ?? 0) - (values.primeRatePct ?? 0)) * 100) / 100;
+      setValue("spreadPct", newSpread, { shouldDirty: true });
+    }
+    setValue("rateType", next, { shouldDirty: true });
+  };
 
   return (
     <Card className="border-border shadow-sm bg-card hover-elevate no-default-hover-elevate">
@@ -145,27 +175,111 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
 
         {/* Interest Rate */}
         <div className="space-y-3">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
             <Label htmlFor="annualRatePct">Interest Rate</Label>
-            <div className="relative w-24">
-              <Input
-                id="annualRatePct"
-                type="number"
-                step="0.01"
-                className="pr-7 text-right"
-                {...register("annualRatePct", { valueAsNumber: true })}
-              />
-              <span className="absolute right-3 top-1.5 text-muted-foreground">%</span>
+            <div className="inline-flex rounded-md border border-border overflow-hidden text-xs self-start sm:self-auto">
+              <Button
+                type="button"
+                variant={!isVariable ? "default" : "ghost"}
+                size="sm"
+                className="rounded-none h-8 px-3 text-xs font-medium"
+                onClick={() => handleRateTypeChange("fixed")}
+                aria-pressed={!isVariable}
+              >
+                Fixed
+              </Button>
+              <Button
+                type="button"
+                variant={isVariable ? "default" : "ghost"}
+                size="sm"
+                className="rounded-none h-8 px-3 text-xs font-medium border-l border-border"
+                onClick={() => handleRateTypeChange("variable")}
+                aria-pressed={isVariable}
+              >
+                Variable
+              </Button>
             </div>
           </div>
-          <Slider
-            min={0}
-            max={15}
-            step={0.05}
-            value={[values.annualRatePct]}
-            onValueChange={([val]) => setValue("annualRatePct", val)}
-            className="py-2"
-          />
+
+          {!isVariable ? (
+            <>
+              <div className="flex justify-end">
+                <div className="relative w-24">
+                  <Input
+                    id="annualRatePct"
+                    type="number"
+                    step="0.01"
+                    className="pr-7 text-right"
+                    {...register("annualRatePct", { valueAsNumber: true })}
+                  />
+                  <span className="absolute right-3 top-1.5 text-muted-foreground">%</span>
+                </div>
+              </div>
+              <Slider
+                min={0}
+                max={15}
+                step={0.05}
+                value={[values.annualRatePct]}
+                onValueChange={([val]) => setValue("annualRatePct", val)}
+                className="py-2"
+              />
+            </>
+          ) : (
+            <div className="space-y-3 rounded-md border border-border bg-muted/30 p-3">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                <div className="flex-1 min-w-0">
+                  <Label htmlFor="primeRatePct" className="text-sm">Prime Rate</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Your bank's posted prime
+                  </p>
+                </div>
+                <div className="relative w-24">
+                  <Input
+                    id="primeRatePct"
+                    type="number"
+                    step="0.05"
+                    min={0}
+                    className="pr-7 text-right"
+                    {...register("primeRatePct", { valueAsNumber: true })}
+                  />
+                  <span className="absolute right-3 top-1.5 text-muted-foreground">%</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                <div className="flex-1 min-w-0">
+                  <Label htmlFor="spreadPct" className="text-sm">Spread</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Use negative for prime discount (e.g. −0.50)
+                  </p>
+                </div>
+                <div className="relative w-24">
+                  <Input
+                    id="spreadPct"
+                    type="number"
+                    step="0.05"
+                    className="pr-7 text-right"
+                    {...register("spreadPct", { valueAsNumber: true })}
+                  />
+                  <span className="absolute right-3 top-1.5 text-muted-foreground">%</span>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center pt-2 border-t border-border">
+                <span className="text-sm font-medium">Effective Rate</span>
+                <div className="text-right">
+                  <div className="text-base font-semibold tabular-nums">
+                    {effectiveVariableRate.toFixed(2)}%
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">
+                    Prime {(values.primeRatePct ?? 0).toFixed(2)}%
+                    {" "}{(values.spreadPct ?? 0) >= 0 ? "+" : "−"}{" "}
+                    {Math.abs(values.spreadPct ?? 0).toFixed(2)}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Amortization */}

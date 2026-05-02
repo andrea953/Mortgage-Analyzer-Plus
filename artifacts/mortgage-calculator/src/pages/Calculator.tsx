@@ -21,12 +21,17 @@ import {
 
 export type BalanceMode = "new" | "current";
 
+export type RateType = "fixed" | "variable";
+
 export type ScenarioState = {
   title: string;
   mode: BalanceMode;
   termStartDate: string;
   principal: number;
   annualRatePct: number;
+  rateType: RateType;
+  primeRatePct: number;
+  spreadPct: number;
   amortizationYears: number;
   amortizationMonths: number;
   termYears: number;
@@ -79,6 +84,9 @@ const defaultScenario: ScenarioState = {
   termStartDate: todayIso(),
   principal: 500000,
   annualRatePct: 5.25,
+  rateType: "fixed",
+  primeRatePct: 5.45,
+  spreadPct: 0,
   amortizationYears: 25,
   amortizationMonths: 0,
   termYears: 5,

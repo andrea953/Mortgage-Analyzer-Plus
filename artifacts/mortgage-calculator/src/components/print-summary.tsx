@@ -120,7 +120,18 @@ function ScenarioBlock({
           </tr>
           <tr>
             <th>Interest Rate</th>
-            <td>{scenario.annualRatePct.toFixed(2)}% (Canadian semi-annual convention)</td>
+            <td>
+              {scenario.annualRatePct.toFixed(2)}%
+              {scenario.rateType === "variable" && (
+                <>
+                  {" "}— Variable: Prime {scenario.primeRatePct.toFixed(2)}%
+                  {" "}{scenario.spreadPct >= 0 ? "+" : "−"}{" "}
+                  {Math.abs(scenario.spreadPct).toFixed(2)}%
+                </>
+              )}
+              {scenario.rateType === "fixed" && " (fixed)"}
+              {" "}· Canadian semi-annual convention
+            </td>
           </tr>
           <tr>
             <th>{scenario.mode === "current" ? "Remaining Amortization" : "Amortization"}</th>
