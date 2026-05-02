@@ -188,8 +188,10 @@ export function buildSchedule({
   return schedule;
 }
 
-export function summarize(schedule: ScheduleRow[], termYears: number) {
+export function summarize(schedule: ScheduleRow[], termYears: number, termStartDate?: Date) {
   if (schedule.length === 0) {
+    const fallback = termStartDate ? new Date(termStartDate) : new Date();
+    fallback.setFullYear(fallback.getFullYear() + termYears);
     return {
       regularPayment: 0,
       totalPayment: 0,
@@ -197,25 +199,23 @@ export function summarize(schedule: ScheduleRow[], termYears: number) {
       totalInterest: 0,
       termInterest: 0,
       termEndingBalance: 0,
-      renewalDate: new Date(),
+      renewalDate: fallback,
     };
   }
 
   const regularPayment = schedule[0].payment - schedule[0].extra - schedule[0].lumpSum;
   const totalPayment = schedule[0].payment - schedule[0].lumpSum;
   const payoffMonths = Math.ceil(
-    (schedule[schedule.length - 1].date.getTime() - schedule[0].date.getTime()) / 
+    (schedule[schedule.length - 1].date.getTime() - schedule[0].date.getTime()) /
     (1000 * 60 * 60 * 24 * 30.44)
   );
-  
+
   const totalInterest = schedule.reduce((sum, row) => sum + row.interest, 0);
 
-  // Renewal date = start of loan + term years. We use the date BEFORE the first
-  // payment as the loan start (the schedule advances the date before recording).
-  const loanStart = new Date(schedule[0].date);
-  // Roll back one period to estimate the loan start date
-  // (schedule[0].date is the date of the first payment)
-  const renewalDate = new Date(loanStart);
+  // Renewal date = term start + term years. Prefer the provided termStartDate;
+  // fall back to the first payment date when not provided.
+  const baseStart = termStartDate ? new Date(termStartDate) : new Date(schedule[0].date);
+  const renewalDate = new Date(baseStart);
   renewalDate.setFullYear(renewalDate.getFullYear() + termYears);
 
   const termRows = schedule.filter(row => row.date <= renewalDate);

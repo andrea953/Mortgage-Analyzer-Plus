@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { ScenarioState } from "@/pages/Calculator";
+import { ScenarioState, BalanceMode } from "@/pages/Calculator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -47,7 +47,9 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
         typeof v.termYears === "number" && !isNaN(v.termYears) &&
         typeof v.extraPerPeriod === "number" && !isNaN(v.extraPerPeriod) &&
       typeof v.lumpSumValue === "number" && !isNaN(v.lumpSumValue) &&
-      (v.lumpSumType === "amount" || v.lumpSumType === "percent")
+      (v.lumpSumType === "amount" || v.lumpSumType === "percent") &&
+      (v.mode === "new" || v.mode === "current") &&
+      typeof v.termStartDate === "string" && v.termStartDate.length > 0
       ) {
         onChange(v as ScenarioState);
       }
@@ -55,17 +57,72 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
     return () => sub.unsubscribe();
   }, [form, onChange]);
 
+  const isCurrent = values.mode === "current";
+
   return (
     <Card className="border-border shadow-sm bg-card hover-elevate no-default-hover-elevate">
-      <CardHeader className="pb-4">
+      <CardHeader className="pb-4 flex flex-row items-center justify-between gap-3 space-y-0">
         <CardTitle className="text-lg font-medium">Loan Details</CardTitle>
+        <div className="inline-flex rounded-md border border-border overflow-hidden text-xs">
+          <Button
+            type="button"
+            variant={!isCurrent ? "default" : "ghost"}
+            size="sm"
+            className="rounded-none h-8 px-3 text-xs font-medium"
+            onClick={() => setValue("mode", "new" as BalanceMode)}
+            aria-pressed={!isCurrent}
+          >
+            New mortgage
+          </Button>
+          <Button
+            type="button"
+            variant={isCurrent ? "default" : "ghost"}
+            size="sm"
+            className="rounded-none h-8 px-3 text-xs font-medium border-l border-border"
+            onClick={() => setValue("mode", "current" as BalanceMode)}
+            aria-pressed={isCurrent}
+          >
+            Current balance
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        
-        {/* Loan Amount */}
+
+        {/* Term Start Date */}
+        <div className="space-y-3">
+          <div className="flex justify-between items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <Label htmlFor="termStartDate">
+                {isCurrent ? "Term Start Date" : "Loan Start Date"}
+              </Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {isCurrent
+                  ? "When this term begins (used for renewal date)"
+                  : "When the loan is funded"}
+              </p>
+            </div>
+            <Input
+              id="termStartDate"
+              type="date"
+              className="w-44"
+              {...register("termStartDate")}
+            />
+          </div>
+        </div>
+
+        {/* Loan Amount / Current Balance */}
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <Label htmlFor="principal">Loan Amount</Label>
+            <div className="flex-1 min-w-0">
+              <Label htmlFor="principal">
+                {isCurrent ? "Current Balance" : "Loan Amount"}
+              </Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {isCurrent
+                  ? "Principal owing at start of this term"
+                  : "Original principal at start of term"}
+              </p>
+            </div>
             <div className="relative w-32">
               <span className="absolute left-3 top-1.5 text-muted-foreground">$</span>
               <Input
@@ -114,7 +171,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
         {/* Amortization */}
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <Label>Amortization</Label>
+            <Label>{isCurrent ? "Remaining Amortization" : "Amortization"}</Label>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2">
                 <Input

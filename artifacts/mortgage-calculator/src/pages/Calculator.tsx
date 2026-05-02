@@ -12,7 +12,11 @@ import { buildSchedule, summarize, PaymentFrequency, LumpSumType } from "@/lib/m
 import { ScenarioComparison } from "@/components/scenario-comparison";
 import { Card, CardContent } from "@/components/ui/card";
 
+export type BalanceMode = "new" | "current";
+
 export type ScenarioState = {
+  mode: BalanceMode;
+  termStartDate: string;
   principal: number;
   annualRatePct: number;
   amortizationYears: number;
@@ -24,7 +28,17 @@ export type ScenarioState = {
   lumpSumType: LumpSumType;
 };
 
+const todayIso = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
 const defaultScenario: ScenarioState = {
+  mode: "new",
+  termStartDate: todayIso(),
   principal: 500000,
   annualRatePct: 5.25,
   amortizationYears: 25,
@@ -46,6 +60,16 @@ export default function Calculator() {
     frequency: "Accelerated bi-weekly"
   });
 
+  const parseStart = (iso: string) => {
+    if (!iso) return new Date();
+    const [y, m, d] = iso.split("-").map(Number);
+    if (!y || !m || !d) return new Date();
+    return new Date(y, m - 1, d);
+  };
+
+  const startDateA = useMemo(() => parseStart(scenarioA.termStartDate), [scenarioA.termStartDate]);
+  const startDateB = useMemo(() => parseStart(scenarioB.termStartDate), [scenarioB.termStartDate]);
+
   const scheduleA = useMemo(() => buildSchedule({
     principal: scenarioA.principal,
     annualRatePct: scenarioA.annualRatePct,
@@ -54,7 +78,8 @@ export default function Calculator() {
     extraPerPeriod: scenarioA.extraPerPeriod,
     lumpSumValue: scenarioA.lumpSumValue,
     lumpSumType: scenarioA.lumpSumType,
-  }), [scenarioA]);
+    startDate: startDateA,
+  }), [scenarioA, startDateA]);
 
   const scheduleB = useMemo(() => buildSchedule({
     principal: scenarioB.principal,
@@ -64,10 +89,11 @@ export default function Calculator() {
     extraPerPeriod: scenarioB.extraPerPeriod,
     lumpSumValue: scenarioB.lumpSumValue,
     lumpSumType: scenarioB.lumpSumType,
-  }), [scenarioB]);
+    startDate: startDateB,
+  }), [scenarioB, startDateB]);
 
-  const summaryA = useMemo(() => summarize(scheduleA, scenarioA.termYears), [scheduleA, scenarioA.termYears]);
-  const summaryB = useMemo(() => summarize(scheduleB, scenarioB.termYears), [scheduleB, scenarioB.termYears]);
+  const summaryA = useMemo(() => summarize(scheduleA, scenarioA.termYears, startDateA), [scheduleA, scenarioA.termYears, startDateA]);
+  const summaryB = useMemo(() => summarize(scheduleB, scenarioB.termYears, startDateB), [scheduleB, scenarioB.termYears, startDateB]);
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
