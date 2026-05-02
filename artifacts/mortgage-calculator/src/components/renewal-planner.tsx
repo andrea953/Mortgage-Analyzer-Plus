@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, X, TrendingDown, Banknote, Award, Info } from "lucide-react";
+import { Plus, X, TrendingDown, Banknote, Award, Info, ExternalLink } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 import { ScenarioState } from "@/pages/Calculator";
 import { buildSchedule, summarize, PaymentFrequency, frequencyPeriods, ScheduleRow } from "@/lib/mortgage";
@@ -233,7 +233,19 @@ export function RenewalPlanner({
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-lg font-semibold">Renewal Options</h2>
-          <p className="text-sm text-muted-foreground">Compare different terms, rates, and frequencies side-by-side.</p>
+          <p className="text-sm text-muted-foreground">
+            Compare different terms, rates, and frequencies side-by-side.{" "}
+            <a
+              href="https://www.ratehub.ca/best-mortgage-rates"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-primary hover:underline font-medium"
+              data-testid="link-ratehub"
+            >
+              Check live rates on ratehub.ca
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          </p>
         </div>
         <Button onClick={add} disabled={options.length >= 4} size="sm" variant="outline" className="gap-2">
           <Plus className="h-4 w-4" /> Add option
