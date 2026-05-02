@@ -1,16 +1,15 @@
 import React, { useState, useMemo } from "react";
-import { Moon, Sun, Plus, Calculator as CalculatorIcon, ArrowRightLeft } from "lucide-react";
+import { Moon, Sun, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/components/theme-provider";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScenarioForm } from "@/components/scenario-form";
 import { ScenarioResults } from "@/components/scenario-results";
 import { AmortizationChart } from "@/components/amortization-chart";
 import { AmortizationSchedule } from "@/components/amortization-schedule";
 import { buildSchedule, summarize, PaymentFrequency, LumpSumType } from "@/lib/mortgage";
 import { ScenarioComparison } from "@/components/scenario-comparison";
-import { Card, CardContent } from "@/components/ui/card";
+import { PrintSummary } from "@/components/print-summary";
 
 export type BalanceMode = "new" | "current";
 
@@ -97,26 +96,46 @@ export default function Calculator() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
-      <header className="border-b sticky top-0 z-10 bg-background/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary text-primary-foreground p-1.5 rounded-lg">
-              <CalculatorIcon className="w-5 h-5" />
+      <header className="border-b sticky top-0 z-10 bg-background/80 backdrop-blur-md print:hidden">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="brand-logo-bg w-11 h-11 rounded-2xl flex items-center justify-center shrink-0">
+              <span className="text-xl font-bold bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">$</span>
             </div>
-            <div>
-              <h1 className="font-bold text-lg leading-tight tracking-tight">Mortgage Lab</h1>
-              <p className="text-xs text-muted-foreground leading-none">Precise scenario modeling</p>
+            <div className="min-w-0">
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <h1 className="text-xl font-bold tracking-tight brand-text-gradient leading-none">
+                  Mortgage Lab
+                </h1>
+                <span className="text-muted-foreground/50 text-lg leading-none">|</span>
+                <span className="text-sm font-medium text-foreground/80 leading-none">
+                  Canadian Mortgage Modeling
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 leading-none">
+                Polished scenario modeling with semi-annual interest, lump sums, and renewal projections
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.print()}
+              className="gap-2"
+              data-testid="button-print"
+            >
+              <Printer className="h-4 w-4" />
+              <span className="hidden sm:inline">Print Summary</span>
+            </Button>
             <div className="flex items-center gap-2">
               <label htmlFor="compare-mode" className="text-sm font-medium cursor-pointer">
                 Compare
               </label>
-              <Switch 
-                id="compare-mode" 
-                checked={isCompare} 
-                onCheckedChange={setIsCompare} 
+              <Switch
+                id="compare-mode"
+                checked={isCompare}
+                onCheckedChange={setIsCompare}
               />
             </div>
             <Button
@@ -130,7 +149,17 @@ export default function Calculator() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <PrintSummary
+        scenarioA={scenarioA}
+        summaryA={summaryA}
+        scheduleA={scheduleA}
+        scenarioB={isCompare ? scenarioB : undefined}
+        summaryB={isCompare ? summaryB : undefined}
+        scheduleB={isCompare ? scheduleB : undefined}
+        isCompare={isCompare}
+      />
+
+      <main className="max-w-7xl mx-auto px-4 py-8 space-y-8 print:hidden">
         <div className={`grid grid-cols-1 ${isCompare ? 'lg:grid-cols-2' : 'lg:grid-cols-12'} gap-8 items-start`}>
           {/* Inputs Section */}
           <div className={`${isCompare ? '' : 'lg:col-span-4'} space-y-6`}>
@@ -174,7 +203,7 @@ export default function Calculator() {
         )}
       </main>
 
-      <footer className="border-t mt-12 py-8 text-center text-muted-foreground text-sm">
+      <footer className="border-t mt-12 py-8 text-center text-muted-foreground text-sm print:hidden">
         <p>For informational purposes only. Not financial advice.</p>
         <p className="mt-1">Calculations based on standard Canadian mortgage conventions.</p>
       </footer>
