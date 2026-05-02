@@ -116,39 +116,43 @@ export default function Calculator() {
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
       <header className="border-b sticky top-0 z-10 bg-background/80 backdrop-blur-md print:hidden">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="brand-logo-bg w-11 h-11 rounded-2xl flex items-center justify-center shrink-0">
-              <span className="text-xl font-bold bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">$</span>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <div className="brand-logo-bg w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
+              <span className="text-base sm:text-xl font-bold bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">$</span>
             </div>
             <div className="min-w-0">
               <div className="flex items-baseline gap-2 flex-wrap">
-                <h1 className="text-xl font-bold tracking-tight brand-text-gradient leading-none">
+                <h1 className="text-base sm:text-xl font-bold tracking-tight brand-text-gradient leading-none whitespace-nowrap">
                   Mortgage Lab
                 </h1>
-                <span className="text-muted-foreground/50 text-lg leading-none">|</span>
-                <span className="text-sm font-medium text-foreground/80 leading-none">
+                <span className="hidden sm:inline text-muted-foreground/50 text-lg leading-none">|</span>
+                <span className="hidden sm:inline text-sm font-medium text-foreground/80 leading-none">
                   Canadian Mortgage Modeling
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1 leading-none">
+              <p className="hidden md:block text-xs text-muted-foreground mt-1 leading-none">
                 Polished scenario modeling with semi-annual interest, lump sums, and renewal projections
+              </p>
+              <p className="sm:hidden text-[10px] text-muted-foreground mt-0.5 leading-none truncate">
+                Canadian Mortgage Modeling
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
             <Button
               variant="outline"
               size="sm"
               onClick={() => window.print()}
-              className="gap-2"
+              className="gap-2 h-8 sm:h-9 px-2 sm:px-3"
               data-testid="button-print"
+              aria-label="Print Summary"
             >
               <Printer className="h-4 w-4" />
-              <span className="hidden sm:inline">Print Summary</span>
+              <span className="hidden md:inline">Print Summary</span>
             </Button>
-            <div className="flex items-center gap-2">
-              <label htmlFor="compare-mode" className="text-sm font-medium cursor-pointer">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <label htmlFor="compare-mode" className="text-xs sm:text-sm font-medium cursor-pointer">
                 Compare
               </label>
               <Switch
@@ -160,7 +164,9 @@ export default function Calculator() {
             <Button
               variant="ghost"
               size="icon"
+              className="h-8 w-8 sm:h-10 sm:w-10"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              aria-label="Toggle theme"
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
@@ -195,9 +201,9 @@ export default function Calculator() {
         }))}
       />
 
-      <main className="max-w-7xl mx-auto px-4 py-8 print:hidden">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8 print:hidden">
         <Tabs value={tab} onValueChange={(v) => setTab(v as "calculator" | "renewal")}>
-          <TabsList className="mb-6">
+          <TabsList className="mb-4 sm:mb-6 w-full sm:w-auto">
             <TabsTrigger value="calculator" className="gap-2">
               <CalculatorIcon className="h-4 w-4" />
               Calculator
@@ -208,8 +214,8 @@ export default function Calculator() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="calculator" className="space-y-8 mt-0">
-            <div className={`grid grid-cols-1 ${isCompare ? 'lg:grid-cols-2' : 'lg:grid-cols-12'} gap-8 items-start`}>
+          <TabsContent value="calculator" className="space-y-6 sm:space-y-8 mt-0">
+            <div className={`grid grid-cols-1 ${isCompare ? 'lg:grid-cols-2' : 'lg:grid-cols-12'} gap-6 sm:gap-8 items-start`}>
               {/* Inputs Section */}
               <div className={`${isCompare ? '' : 'lg:col-span-4'} space-y-6`}>
                 {isCompare && <h2 className="text-xl font-semibold flex items-center gap-2">Scenario A</h2>}
@@ -227,7 +233,7 @@ export default function Calculator() {
                   <ScenarioForm state={scenarioB} onChange={setScenarioB} />
                 </div>
               ) : (
-                <div className="lg:col-span-8 space-y-8">
+                <div className="lg:col-span-8 space-y-6 sm:space-y-8">
                   <AmortizationChart
                     scheduleA={scheduleA}
                     scenarioA={scenarioA}
@@ -238,7 +244,7 @@ export default function Calculator() {
             </div>
 
             {isCompare && (
-              <div className="space-y-8 mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="space-y-6 sm:space-y-8 mt-8 sm:mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <ScenarioComparison
                   scenarioA={scenarioA} summaryA={summaryA}
                   scenarioB={scenarioB} summaryB={summaryB}

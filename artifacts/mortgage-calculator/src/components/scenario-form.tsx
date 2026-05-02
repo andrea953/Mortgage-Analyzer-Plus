@@ -61,7 +61,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
 
   return (
     <Card className="border-border shadow-sm bg-card hover-elevate no-default-hover-elevate">
-      <CardHeader className="pb-4 flex flex-row items-center justify-between gap-3 space-y-0">
+      <CardHeader className="pb-4 flex flex-col items-start sm:flex-row sm:items-center sm:justify-between gap-3 space-y-0">
         <CardTitle className="text-lg font-medium">Loan Details</CardTitle>
         <div className="inline-flex rounded-md border border-border overflow-hidden text-xs">
           <Button
@@ -90,7 +90,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
 
         {/* Term Start Date */}
         <div className="space-y-3">
-          <div className="flex justify-between items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3">
             <div className="flex-1 min-w-0">
               <Label htmlFor="termStartDate">
                 {isCurrent ? "Term Start Date" : "Loan Start Date"}
@@ -104,7 +104,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
             <Input
               id="termStartDate"
               type="date"
-              className="w-44"
+              className="w-full sm:w-44"
               {...register("termStartDate")}
             />
           </div>
@@ -112,7 +112,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
 
         {/* Loan Amount / Current Balance */}
         <div className="space-y-3">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3">
             <div className="flex-1 min-w-0">
               <Label htmlFor="principal">
                 {isCurrent ? "Current Balance" : "Loan Amount"}
@@ -123,7 +123,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                   : "Original principal at start of term"}
               </p>
             </div>
-            <div className="relative w-32">
+            <div className="relative w-full sm:w-32">
               <span className="absolute left-3 top-1.5 text-muted-foreground">$</span>
               <Input
                 id="principal"
@@ -247,9 +247,9 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
 
         {/* Extra Payment */}
         <div className="space-y-3">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
             <Label htmlFor="extraPerPeriod">Extra Payment (per period)</Label>
-            <div className="relative w-32">
+            <div className="relative w-full sm:w-32">
               <span className="absolute left-3 top-1.5 text-muted-foreground">$</span>
               <Input
                 id="extraPerPeriod"
@@ -263,7 +263,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
 
         {/* Annual Lump Sum Prepayment */}
         <div className="space-y-3 pt-4 border-t border-border">
-          <div className="flex justify-between items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3">
             <div className="flex-1 min-w-0">
               <Label htmlFor="lumpSumValue">Annual Lump Sum</Label>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -271,7 +271,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <div className="inline-flex rounded-md border border-border overflow-hidden">
+              <div className="inline-flex rounded-md border border-border overflow-hidden shrink-0">
                 <Button
                   type="button"
                   variant={values.lumpSumType === "amount" ? "default" : "ghost"}
@@ -293,7 +293,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                   %
                 </Button>
               </div>
-              <div className="relative w-28">
+              <div className="relative flex-1 sm:flex-none sm:w-28">
                 {values.lumpSumType === "amount" ? (
                   <span className="absolute left-3 top-1.5 text-muted-foreground pointer-events-none">$</span>
                 ) : (
