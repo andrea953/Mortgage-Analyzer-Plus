@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
-import { Moon, Sun, Printer, Calculator as CalculatorIcon, RefreshCw } from "lucide-react";
+import { Moon, Sun, Printer, Calculator as CalculatorIcon, RefreshCw, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTheme } from "@/components/theme-provider";
@@ -21,6 +22,7 @@ import {
 export type BalanceMode = "new" | "current";
 
 export type ScenarioState = {
+  title: string;
   mode: BalanceMode;
   termStartDate: string;
   principal: number;
@@ -42,7 +44,37 @@ const todayIso = () => {
   return `${y}-${m}-${day}`;
 };
 
+function ScenarioTitleInput({
+  value,
+  onChange,
+  placeholder,
+  accentClass,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  accentClass: string;
+}) {
+  return (
+    <div className="flex items-center gap-2 group">
+      <span className={`w-1.5 h-7 rounded-full ${accentClass} shrink-0`} aria-hidden="true" />
+      <div className="relative flex-1 min-w-0">
+        <Input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="text-xl font-semibold border-transparent bg-transparent hover:bg-muted/50 focus-visible:bg-card focus-visible:border-input px-2 -mx-2 h-9 transition-colors pr-8"
+          aria-label="Scenario title"
+          maxLength={40}
+        />
+        <Pencil className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors pointer-events-none" />
+      </div>
+    </div>
+  );
+}
+
 const defaultScenario: ScenarioState = {
+  title: "Scenario A",
   mode: "new",
   termStartDate: todayIso(),
   principal: 500000,
@@ -59,10 +91,11 @@ const defaultScenario: ScenarioState = {
 export default function Calculator() {
   const { theme, setTheme } = useTheme();
   const [tab, setTab] = useState<"calculator" | "renewal">("calculator");
-  const [isCompare, setIsCompare] = useState(false);
+  const [isCompare, setIsCompare] = useState(true);
   const [scenarioA, setScenarioA] = useState<ScenarioState>({ ...defaultScenario });
   const [scenarioB, setScenarioB] = useState<ScenarioState>({ 
     ...defaultScenario, 
+    title: "Scenario B",
     annualRatePct: 4.75,
     frequency: "Accelerated bi-weekly"
   });
@@ -218,7 +251,14 @@ export default function Calculator() {
             <div className={`grid grid-cols-1 ${isCompare ? 'lg:grid-cols-2' : 'lg:grid-cols-12'} gap-6 sm:gap-8 items-start`}>
               {/* Inputs Section */}
               <div className={`${isCompare ? '' : 'lg:col-span-4'} space-y-6`}>
-                {isCompare && <h2 className="text-xl font-semibold flex items-center gap-2">Scenario A</h2>}
+                {isCompare && (
+                  <ScenarioTitleInput
+                    value={scenarioA.title}
+                    onChange={(t) => setScenarioA({ ...scenarioA, title: t })}
+                    placeholder="Scenario A"
+                    accentClass="bg-[hsl(var(--chart-1))]"
+                  />
+                )}
                 <ScenarioForm state={scenarioA} onChange={setScenarioA} />
                 {!isCompare && (
                   <div className="mt-8 pt-8 border-t">
@@ -229,7 +269,12 @@ export default function Calculator() {
 
               {isCompare ? (
                 <div className="space-y-6">
-                  <h2 className="text-xl font-semibold flex items-center gap-2">Scenario B</h2>
+                  <ScenarioTitleInput
+                    value={scenarioB.title}
+                    onChange={(t) => setScenarioB({ ...scenarioB, title: t })}
+                    placeholder="Scenario B"
+                    accentClass="bg-[hsl(var(--chart-3))]"
+                  />
                   <ScenarioForm state={scenarioB} onChange={setScenarioB} />
                 </div>
               ) : (

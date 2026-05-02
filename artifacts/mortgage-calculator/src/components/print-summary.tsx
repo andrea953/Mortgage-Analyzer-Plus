@@ -289,10 +289,22 @@ export function PrintSummary({
 
       {isCompare && scenarioB && summaryB && scheduleB ? (
         <div className="ps-compare">
-          <ScenarioBlock label="Scenario A" scenario={scenarioA} summary={summaryA} schedule={scheduleA} />
-          <ScenarioBlock label="Scenario B" scenario={scenarioB} summary={summaryB} schedule={scheduleB} />
+          <ScenarioBlock
+            label={scenarioA.title?.trim() || "Scenario A"}
+            scenario={scenarioA}
+            summary={summaryA}
+            schedule={scheduleA}
+          />
+          <ScenarioBlock
+            label={scenarioB.title?.trim() || "Scenario B"}
+            scenario={scenarioB}
+            summary={summaryB}
+            schedule={scheduleB}
+          />
           <div className="ps-diff">
-            <h3 className="ps-h3">At a Glance · Difference (B − A)</h3>
+            <h3 className="ps-h3">
+              At a Glance · Difference ({(scenarioB.title?.trim() || "Scenario B")} − {(scenarioA.title?.trim() || "Scenario A")})
+            </h3>
             <table className="ps-table">
               <tbody>
                 <tr>

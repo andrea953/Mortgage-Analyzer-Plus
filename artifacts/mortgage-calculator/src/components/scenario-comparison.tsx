@@ -27,11 +27,18 @@ export function ScenarioComparison({ scenarioA, summaryA, scenarioB, summaryB }:
     );
   };
 
+  const titleA = scenarioA.title?.trim() || "Scenario A";
+  const titleB = scenarioB.title?.trim() || "Scenario B";
+
   return (
     <Card className="border-border shadow-md bg-card/50 overflow-hidden">
       <div className="bg-muted p-4 border-b">
-        <h3 className="font-semibold text-lg">Scenario B vs A</h3>
-        <p className="text-sm text-muted-foreground">See how Scenario B performs compared to Scenario A</p>
+        <h3 className="font-semibold text-lg">
+          <span className="text-foreground">{titleB}</span>
+          <span className="text-muted-foreground font-normal mx-2">vs</span>
+          <span className="text-foreground">{titleA}</span>
+        </h3>
+        <p className="text-sm text-muted-foreground">See how {titleB} performs compared to {titleA}</p>
       </div>
       <CardContent className="p-0">
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x">

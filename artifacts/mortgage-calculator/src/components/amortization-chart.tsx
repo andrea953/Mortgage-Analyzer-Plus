@@ -124,7 +124,7 @@ export function AmortizationChart({ scheduleA, scenarioA, scheduleB, scenarioB, 
                 <Line 
                   type="monotone" 
                   dataKey="balanceA" 
-                  name={isCompare ? "Scenario A Balance" : "Balance"} 
+                  name={isCompare ? `${scenarioA.title?.trim() || "Scenario A"} Balance` : "Balance"} 
                   stroke={colors.primary} 
                   strokeWidth={3} 
                   dot={false}
@@ -134,7 +134,7 @@ export function AmortizationChart({ scheduleA, scenarioA, scheduleB, scenarioB, 
                   <Line 
                     type="monotone" 
                     dataKey="balanceB" 
-                    name="Scenario B Balance" 
+                    name={`${scenarioB?.title?.trim() || "Scenario B"} Balance`} 
                     stroke={colors.secondary} 
                     strokeWidth={3} 
                     dot={false}
