@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from "react";
-import { Moon, Sun, Printer } from "lucide-react";
+import { Moon, Sun, Printer, Calculator as CalculatorIcon, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTheme } from "@/components/theme-provider";
 import { ScenarioForm } from "@/components/scenario-form";
 import { ScenarioResults } from "@/components/scenario-results";
@@ -10,6 +11,12 @@ import { AmortizationSchedule } from "@/components/amortization-schedule";
 import { buildSchedule, summarize, PaymentFrequency, LumpSumType } from "@/lib/mortgage";
 import { ScenarioComparison } from "@/components/scenario-comparison";
 import { PrintSummary } from "@/components/print-summary";
+import {
+  RenewalPlanner,
+  RenewalOption,
+  defaultRenewalOptions,
+  computeRenewals,
+} from "@/components/renewal-planner";
 
 export type BalanceMode = "new" | "current";
 
@@ -51,6 +58,7 @@ const defaultScenario: ScenarioState = {
 
 export default function Calculator() {
   const { theme, setTheme } = useTheme();
+  const [tab, setTab] = useState<"calculator" | "renewal">("renewal");
   const [isCompare, setIsCompare] = useState(false);
   const [scenarioA, setScenarioA] = useState<ScenarioState>({ ...defaultScenario });
   const [scenarioB, setScenarioB] = useState<ScenarioState>({ 
@@ -58,6 +66,7 @@ export default function Calculator() {
     annualRatePct: 4.75,
     frequency: "Accelerated bi-weekly"
   });
+  const [renewalOptions, setRenewalOptions] = useState<RenewalOption[]>(defaultRenewalOptions);
 
   const parseStart = (iso: string) => {
     if (!iso) return new Date();
@@ -93,6 +102,16 @@ export default function Calculator() {
 
   const summaryA = useMemo(() => summarize(scheduleA, scenarioA.termYears, startDateA), [scheduleA, scenarioA.termYears, startDateA]);
   const summaryB = useMemo(() => summarize(scheduleB, scenarioB.termYears, startDateB), [scheduleB, scenarioB.termYears, startDateB]);
+
+  const totalAmortMonthsA = scenarioA.amortizationYears * 12 + scenarioA.amortizationMonths;
+  const remainingAmortMonths = Math.max(totalAmortMonthsA - scenarioA.termYears * 12, 0);
+  const renewalBalance = summaryA.termEndingBalance;
+  const renewalDate = summaryA.renewalDate;
+
+  const computedRenewals = useMemo(
+    () => computeRenewals(renewalOptions, renewalBalance, remainingAmortMonths, renewalDate),
+    [renewalOptions, renewalBalance, remainingAmortMonths, renewalDate],
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
@@ -157,50 +176,93 @@ export default function Calculator() {
         summaryB={isCompare ? summaryB : undefined}
         scheduleB={isCompare ? scheduleB : undefined}
         isCompare={isCompare}
+        showRenewal={tab === "renewal"}
+        renewalBalance={renewalBalance}
+        renewalDate={renewalDate}
+        remainingAmortMonths={remainingAmortMonths}
+        renewalOptions={computedRenewals.map((c) => ({
+          label: c.opt.label,
+          rateType: c.opt.rateType,
+          rate: c.opt.rate,
+          termYears: c.opt.termYears,
+          frequency: c.opt.frequency,
+          extraPerPeriod: c.opt.extraPerPeriod,
+          payment: c.summary.totalPayment,
+          termInterest: c.summary.termInterest,
+          totalCostInTerm: c.totalCostInTerm,
+          termEndingBalance: c.summary.termEndingBalance,
+          termEndDate: c.summary.renewalDate,
+        }))}
       />
 
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-8 print:hidden">
-        <div className={`grid grid-cols-1 ${isCompare ? 'lg:grid-cols-2' : 'lg:grid-cols-12'} gap-8 items-start`}>
-          {/* Inputs Section */}
-          <div className={`${isCompare ? '' : 'lg:col-span-4'} space-y-6`}>
-            {isCompare && <h2 className="text-xl font-semibold flex items-center gap-2">Scenario A</h2>}
-            <ScenarioForm state={scenarioA} onChange={setScenarioA} />
-            {!isCompare && (
-              <div className="mt-8 pt-8 border-t">
-                <ScenarioResults summary={summaryA} scenario={scenarioA} />
+      <main className="max-w-7xl mx-auto px-4 py-8 print:hidden">
+        <Tabs value={tab} onValueChange={(v) => setTab(v as "calculator" | "renewal")}>
+          <TabsList className="mb-6">
+            <TabsTrigger value="calculator" className="gap-2">
+              <CalculatorIcon className="h-4 w-4" />
+              Calculator
+            </TabsTrigger>
+            <TabsTrigger value="renewal" className="gap-2">
+              <RefreshCw className="h-4 w-4" />
+              Renewal Planner
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="calculator" className="space-y-8 mt-0">
+            <div className={`grid grid-cols-1 ${isCompare ? 'lg:grid-cols-2' : 'lg:grid-cols-12'} gap-8 items-start`}>
+              {/* Inputs Section */}
+              <div className={`${isCompare ? '' : 'lg:col-span-4'} space-y-6`}>
+                {isCompare && <h2 className="text-xl font-semibold flex items-center gap-2">Scenario A</h2>}
+                <ScenarioForm state={scenarioA} onChange={setScenarioA} />
+                {!isCompare && (
+                  <div className="mt-8 pt-8 border-t">
+                    <ScenarioResults summary={summaryA} scenario={scenarioA} />
+                  </div>
+                )}
+              </div>
+
+              {isCompare ? (
+                <div className="space-y-6">
+                  <h2 className="text-xl font-semibold flex items-center gap-2">Scenario B</h2>
+                  <ScenarioForm state={scenarioB} onChange={setScenarioB} />
+                </div>
+              ) : (
+                <div className="lg:col-span-8 space-y-8">
+                  <AmortizationChart
+                    scheduleA={scheduleA}
+                    scenarioA={scenarioA}
+                  />
+                  <AmortizationSchedule schedule={scheduleA} />
+                </div>
+              )}
+            </div>
+
+            {isCompare && (
+              <div className="space-y-8 mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <ScenarioComparison
+                  scenarioA={scenarioA} summaryA={summaryA}
+                  scenarioB={scenarioB} summaryB={summaryB}
+                />
+                <AmortizationChart
+                  scheduleA={scheduleA} scenarioA={scenarioA}
+                  scheduleB={scheduleB} scenarioB={scenarioB}
+                  isCompare
+                />
               </div>
             )}
-          </div>
+          </TabsContent>
 
-          {isCompare ? (
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold flex items-center gap-2">Scenario B</h2>
-              <ScenarioForm state={scenarioB} onChange={setScenarioB} />
-            </div>
-          ) : (
-            <div className="lg:col-span-8 space-y-8">
-              <AmortizationChart 
-                scheduleA={scheduleA} 
-                scenarioA={scenarioA}
-              />
-              <AmortizationSchedule schedule={scheduleA} />
-            </div>
-          )}
-        </div>
-
-        {isCompare && (
-          <div className="space-y-8 mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <ScenarioComparison 
-              scenarioA={scenarioA} summaryA={summaryA} 
-              scenarioB={scenarioB} summaryB={summaryB} 
+          <TabsContent value="renewal" className="mt-0">
+            <RenewalPlanner
+              scenarioA={scenarioA}
+              renewalBalance={renewalBalance}
+              renewalDate={renewalDate}
+              remainingAmortMonths={remainingAmortMonths}
+              options={renewalOptions}
+              onChange={setRenewalOptions}
             />
-            <AmortizationChart 
-              scheduleA={scheduleA} scenarioA={scenarioA}
-              scheduleB={scheduleB} scenarioB={scenarioB}
-              isCompare
-            />
-          </div>
-        )}
+          </TabsContent>
+        </Tabs>
       </main>
 
       <footer className="border-t mt-12 py-8 text-center text-muted-foreground text-sm print:hidden">

@@ -494,6 +494,57 @@
   grid-column: 1 / -1;
 }
 
+.print-summary .ps-renewal {
+  margin-top: 18px;
+  padding-top: 6px;
+  border-top: 2px solid #0f172a;
+  page-break-before: auto;
+}
+
+.print-summary .ps-renewal-snapshot {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin: 6px 0 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background-image: linear-gradient(135deg, #eef2ff 0%, #fae8ff 100%);
+  border: 1px solid #c7d2fe;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.print-summary .ps-renewal-table th,
+.print-summary .ps-renewal-table td {
+  font-size: 10px;
+}
+
+.print-summary .ps-best-badge {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 9px;
+  font-weight: 600;
+  color: #6366f1;
+  background: #eef2ff;
+  padding: 1px 6px;
+  border-radius: 4px;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.print-summary .ps-renewal-tips {
+  margin-top: 8px;
+  font-size: 10px;
+  color: #475569;
+  line-height: 1.5;
+  padding: 8px 10px;
+  background: #f8fafc;
+  border-left: 3px solid #a855f7;
+  border-radius: 0 4px 4px 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
 .print-summary .ps-scenario-label {
   display: inline-block;
   background: #0f172a;

@@ -1,6 +1,6 @@
 import React from "react";
 import { ScenarioState } from "@/pages/Calculator";
-import { ScheduleRow } from "@/lib/mortgage";
+import { ScheduleRow, PaymentFrequency } from "@/lib/mortgage";
 import { formatCurrency } from "@/lib/format";
 
 type Summary = {
@@ -13,6 +13,20 @@ type Summary = {
   renewalDate: Date;
 };
 
+export type PrintRenewalOption = {
+  label: string;
+  rateType: "fixed" | "variable";
+  rate: number;
+  termYears: number;
+  frequency: PaymentFrequency;
+  extraPerPeriod: number;
+  payment: number;
+  termInterest: number;
+  totalCostInTerm: number;
+  termEndingBalance: number;
+  termEndDate: Date;
+};
+
 type Props = {
   scenarioA: ScenarioState;
   summaryA: Summary;
@@ -21,6 +35,11 @@ type Props = {
   summaryB?: Summary;
   scheduleB?: ScheduleRow[];
   isCompare: boolean;
+  showRenewal?: boolean;
+  renewalBalance?: number;
+  renewalDate?: Date;
+  remainingAmortMonths?: number;
+  renewalOptions?: PrintRenewalOption[];
 };
 
 const fmtDateLong = (d: Date) =>
@@ -219,8 +238,32 @@ export function PrintSummary({
   summaryB,
   scheduleB,
   isCompare,
+  showRenewal,
+  renewalBalance,
+  renewalDate,
+  remainingAmortMonths,
+  renewalOptions,
 }: Props) {
   const generated = new Date();
+  const renewalSection =
+    showRenewal &&
+    renewalOptions &&
+    renewalOptions.length > 0 &&
+    renewalBalance !== undefined &&
+    renewalDate !== undefined &&
+    remainingAmortMonths !== undefined &&
+    renewalBalance > 0.01 &&
+    remainingAmortMonths > 0;
+
+  const lowestPayment = renewalSection
+    ? renewalOptions!.reduce((m, o) => (o.payment < m.payment ? o : m), renewalOptions![0])
+    : undefined;
+  const lowestInterest = renewalSection
+    ? renewalOptions!.reduce((m, o) => (o.termInterest < m.termInterest ? o : m), renewalOptions![0])
+    : undefined;
+  const mostPaidDown = renewalSection
+    ? renewalOptions!.reduce((m, o) => (o.termEndingBalance < m.termEndingBalance ? o : m), renewalOptions![0])
+    : undefined;
   return (
     <div className="hidden print:block print-summary">
       {/* Header */}
@@ -278,6 +321,78 @@ export function PrintSummary({
         </div>
       ) : (
         <ScenarioBlock scenario={scenarioA} summary={summaryA} schedule={scheduleA} />
+      )}
+
+      {/* Renewal Planner section */}
+      {renewalSection && (
+        <div className="ps-renewal">
+          <h3 className="ps-h3">Renewal Options · {fmtMonthYear(renewalDate!)}</h3>
+          <div className="ps-renewal-snapshot">
+            <div>
+              <div className="ps-cell-label">Projected Balance</div>
+              <div className="ps-cell-value">{formatCurrency(renewalBalance!)}</div>
+            </div>
+            <div>
+              <div className="ps-cell-label">Remaining Amortization</div>
+              <div className="ps-cell-value">
+                {Math.floor(remainingAmortMonths! / 12)} yrs {remainingAmortMonths! % 12} mos
+              </div>
+            </div>
+            <div>
+              <div className="ps-cell-label">Renewal Date</div>
+              <div className="ps-cell-value">{fmtMonthYear(renewalDate!)}</div>
+            </div>
+          </div>
+
+          <table className="ps-table ps-table-compact ps-renewal-table">
+            <thead>
+              <tr>
+                <th>Option</th>
+                <th>Type</th>
+                <th className="ps-num">Rate</th>
+                <th className="ps-num">Term</th>
+                <th>Frequency</th>
+                <th className="ps-num">Payment</th>
+                <th className="ps-num">Term Interest</th>
+                <th className="ps-num">Balance at End</th>
+                <th>Term Ends</th>
+              </tr>
+            </thead>
+            <tbody>
+              {renewalOptions!.map((o, i) => {
+                const badges: string[] = [];
+                if (lowestPayment && o === lowestPayment) badges.push("↓ pmt");
+                if (lowestInterest && o === lowestInterest) badges.push("↓ int");
+                if (mostPaidDown && o === mostPaidDown) badges.push("↓ bal");
+                return (
+                  <tr key={i}>
+                    <td>
+                      <strong>{o.label}</strong>
+                      {badges.length > 0 && (
+                        <span className="ps-best-badge"> {badges.join(" · ")}</span>
+                      )}
+                    </td>
+                    <td>{o.rateType === "fixed" ? "Fixed" : "Variable"}</td>
+                    <td className="ps-num">{o.rate.toFixed(2)}%</td>
+                    <td className="ps-num">{o.termYears} yr</td>
+                    <td>{o.frequency}</td>
+                    <td className="ps-num">{formatCurrency(o.payment)}</td>
+                    <td className="ps-num">{formatCurrency(o.termInterest)}</td>
+                    <td className="ps-num">{formatCurrency(o.termEndingBalance)}</td>
+                    <td>{fmtMonthYear(o.termEndDate)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+
+          <div className="ps-renewal-tips">
+            <strong>How to choose:</strong> shorter terms usually carry lower rates but
+            renew sooner (rate-risk). Longer terms lock in payments for predictability.
+            Variable rates float with prime — historically lower but volatile.
+            Higher / accelerated frequency shaves interest without changing your contracted rate.
+          </div>
+        </div>
       )}
 
       {/* Disclaimer */}
