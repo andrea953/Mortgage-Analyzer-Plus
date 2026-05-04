@@ -2,6 +2,7 @@ import React from "react";
 import { ScenarioState } from "@/pages/Calculator";
 import { ScheduleRow, PaymentFrequency } from "@/lib/mortgage";
 import { formatCurrency } from "@/lib/format";
+import modernCentsLogo from "@assets/Big_logo_1777908930945.png";
 
 type Summary = {
   regularPayment: number;
@@ -283,10 +284,10 @@ export function PrintSummary({
       {/* Header */}
       <div className="ps-header">
         <div className="ps-header-left">
-          <div className="ps-logo" aria-hidden="true">$</div>
+          <img src={modernCentsLogo} alt="Modern Cents" className="ps-logo-img" />
           <div>
             <div className="ps-brand">
-              <span className="ps-brand-grad">Mortgage Lab</span>
+              <span className="ps-brand-grad">Modern Cents</span>
               <span className="ps-brand-sep">|</span>
               <span className="ps-brand-sub">Mortgage Decision Summary</span>
             </div>

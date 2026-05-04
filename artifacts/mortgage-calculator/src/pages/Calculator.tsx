@@ -12,6 +12,7 @@ import { AmortizationSchedule } from "@/components/amortization-schedule";
 import { buildSchedule, summarize, PaymentFrequency, LumpSumType } from "@/lib/mortgage";
 import { ScenarioComparison } from "@/components/scenario-comparison";
 import { PrintSummary } from "@/components/print-summary";
+import modernCentsLogo from "@assets/Big_logo_1777908930945.png";
 import {
   RenewalPlanner,
   RenewalOption,
@@ -167,13 +168,16 @@ export default function Calculator() {
       <header className="border-b sticky top-0 z-10 bg-background/80 backdrop-blur-md print:hidden">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-            <div className="brand-logo-bg w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
-              <span className="text-base sm:text-xl font-bold bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">$</span>
-            </div>
+            <img
+              src={modernCentsLogo}
+              alt="Modern Cents"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl shrink-0 shadow-sm ring-1 ring-border/50 object-cover"
+              data-testid="img-brand-logo"
+            />
             <div className="min-w-0">
               <div className="flex items-baseline gap-2 flex-wrap">
                 <h1 className="text-base sm:text-xl font-bold tracking-tight brand-text-gradient leading-none whitespace-nowrap">
-                  Mortgage Lab
+                  Modern Cents
                 </h1>
                 <span className="hidden sm:inline text-muted-foreground/50 text-lg leading-none">|</span>
                 <span className="hidden sm:inline text-sm font-medium text-foreground/80 leading-none">
