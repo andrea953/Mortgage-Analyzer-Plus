@@ -39,6 +39,8 @@ export type ScenarioState = {
   extraPerPeriod: number;
   lumpSumValue: number;
   lumpSumType: LumpSumType;
+  lumpSumStartYear: number;
+  lumpSumEndYear: number;
 };
 
 const todayIso = () => {
@@ -94,6 +96,8 @@ const defaultScenario: ScenarioState = {
   extraPerPeriod: 0,
   lumpSumValue: 0,
   lumpSumType: "amount",
+  lumpSumStartYear: 1,
+  lumpSumEndYear: 25,
 };
 
 export default function Calculator() {
@@ -127,6 +131,8 @@ export default function Calculator() {
     extraPerPeriod: scenarioA.extraPerPeriod,
     lumpSumValue: scenarioA.lumpSumValue,
     lumpSumType: scenarioA.lumpSumType,
+    lumpSumStartYear: scenarioA.lumpSumStartYear,
+    lumpSumEndYear: scenarioA.lumpSumEndYear,
     startDate: startDateA,
   }), [scenarioA, startDateA]);
 
@@ -138,6 +144,8 @@ export default function Calculator() {
     extraPerPeriod: scenarioB.extraPerPeriod,
     lumpSumValue: scenarioB.lumpSumValue,
     lumpSumType: scenarioB.lumpSumType,
+    lumpSumStartYear: scenarioB.lumpSumStartYear,
+    lumpSumEndYear: scenarioB.lumpSumEndYear,
     startDate: startDateB,
   }), [scenarioB, startDateB]);
 

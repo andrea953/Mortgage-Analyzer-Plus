@@ -92,10 +92,13 @@ function ScenarioBlock({
     ? Math.round((principalPaidAtRenewal / scenario.principal) * 100)
     : 0;
 
+  const lumpSumYearRange = scenario.lumpSumValue > 0
+    ? ` (years ${scenario.lumpSumStartYear ?? 1}–${scenario.lumpSumEndYear ?? scenario.amortizationYears})`
+    : "";
   const lumpSumLabel = scenario.lumpSumValue > 0
     ? scenario.lumpSumType === "percent"
-      ? `${scenario.lumpSumValue}% of original (${formatCurrency((scenario.lumpSumValue / 100) * scenario.principal)}) per anniversary`
-      : `${formatCurrency(scenario.lumpSumValue)} per anniversary`
+      ? `${scenario.lumpSumValue}% of original (${formatCurrency((scenario.lumpSumValue / 100) * scenario.principal)}) per anniversary${lumpSumYearRange}`
+      : `${formatCurrency(scenario.lumpSumValue)} per anniversary${lumpSumYearRange}`
     : "None";
 
   return (

@@ -99,6 +99,8 @@ export function buildSchedule({
   extraPerPeriod,
   lumpSumValue = 0,
   lumpSumType = "amount",
+  lumpSumStartYear = 1,
+  lumpSumEndYear,
   startDate = new Date(),
 }: {
   principal: number;
@@ -108,6 +110,8 @@ export function buildSchedule({
   extraPerPeriod: number;
   lumpSumValue?: number;
   lumpSumType?: LumpSumType;
+  lumpSumStartYear?: number;
+  lumpSumEndYear?: number;
   startDate?: Date;
 }): ScheduleRow[] {
   const schedule: ScheduleRow[] = [];
@@ -159,11 +163,16 @@ export function buildSchedule({
     }
     remainingAfterPayment -= extra;
 
-    // Annual lump sum: applied on the last payment of each completed year
+    // Annual lump sum: applied on the last payment of each completed year, within the chosen year range
     let lumpSum = 0;
     const isAnniversary = annualLumpAmount > 0 && n % periodsPerYear === 0;
     if (isAnniversary && remainingAfterPayment > 0) {
-      lumpSum = Math.min(annualLumpAmount, remainingAfterPayment);
+      const completedYear = Math.round(n / periodsPerYear);
+      const startY = Math.max(1, lumpSumStartYear || 1);
+      const endY = lumpSumEndYear && lumpSumEndYear > 0 ? lumpSumEndYear : Infinity;
+      if (completedYear >= startY && completedYear <= endY) {
+        lumpSum = Math.min(annualLumpAmount, remainingAfterPayment);
+      }
     }
 
     const totalPrincipalApplied = principalFromPayment + extra + lumpSum;

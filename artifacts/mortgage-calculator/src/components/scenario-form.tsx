@@ -48,6 +48,8 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
         typeof v.extraPerPeriod === "number" && !isNaN(v.extraPerPeriod) &&
       typeof v.lumpSumValue === "number" && !isNaN(v.lumpSumValue) &&
       (v.lumpSumType === "amount" || v.lumpSumType === "percent") &&
+      typeof v.lumpSumStartYear === "number" && !isNaN(v.lumpSumStartYear) &&
+      typeof v.lumpSumEndYear === "number" && !isNaN(v.lumpSumEndYear) &&
       (v.mode === "new" || v.mode === "current") &&
       (v.rateType === "fixed" || v.rateType === "variable") &&
       typeof v.primeRatePct === "number" && !isNaN(v.primeRatePct) &&
@@ -428,6 +430,38 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
             <p className="text-xs text-muted-foreground">
               {values.lumpSumValue}% of original principal = ${(values.principal * values.lumpSumValue / 100).toLocaleString("en-CA", { maximumFractionDigits: 0 })} per year
             </p>
+          )}
+          {values.lumpSumValue > 0 && (
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <div className="space-y-1">
+                <Label htmlFor="lumpSumStartYear" className="text-xs text-muted-foreground">Apply from year</Label>
+                <Input
+                  id="lumpSumStartYear"
+                  type="number"
+                  min={1}
+                  max={values.amortizationYears || 30}
+                  step={1}
+                  className="text-right h-9"
+                  {...register("lumpSumStartYear", { valueAsNumber: true })}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="lumpSumEndYear" className="text-xs text-muted-foreground">Apply through year</Label>
+                <Input
+                  id="lumpSumEndYear"
+                  type="number"
+                  min={values.lumpSumStartYear || 1}
+                  max={values.amortizationYears || 30}
+                  step={1}
+                  className="text-right h-9"
+                  {...register("lumpSumEndYear", { valueAsNumber: true })}
+                />
+              </div>
+              <p className="col-span-2 text-xs text-muted-foreground">
+                Lump sum applied on anniversaries from year {values.lumpSumStartYear || 1} through year {values.lumpSumEndYear || values.amortizationYears}
+                {" "}({Math.max(0, (values.lumpSumEndYear || 0) - (values.lumpSumStartYear || 0) + 1)} payment{Math.max(0, (values.lumpSumEndYear || 0) - (values.lumpSumStartYear || 0) + 1) === 1 ? "" : "s"}).
+              </p>
+            </div>
           )}
         </div>
 
