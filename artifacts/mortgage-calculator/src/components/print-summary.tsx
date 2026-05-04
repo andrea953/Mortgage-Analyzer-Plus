@@ -280,7 +280,7 @@ export function PrintSummary({
     ? renewalOptions!.reduce((m, o) => (o.termEndingBalance < m.termEndingBalance ? o : m), renewalOptions![0])
     : undefined;
   return (
-    <div className="hidden print:block print-summary">
+    <div className="hidden print:block print-summary" data-no-renewal={renewalSection ? undefined : "true"}>
       {/* Header */}
       <div className="ps-header">
         <div className="ps-header-left">
