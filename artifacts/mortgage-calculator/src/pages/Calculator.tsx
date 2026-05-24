@@ -9,7 +9,7 @@ import { ScenarioForm } from "@/components/scenario-form";
 import { ScenarioResults } from "@/components/scenario-results";
 import { AmortizationChart } from "@/components/amortization-chart";
 import { AmortizationSchedule } from "@/components/amortization-schedule";
-import { buildSchedule, summarize, PaymentFrequency, LumpSumType } from "@/lib/mortgage";
+import { buildSchedule, summarize, PaymentFrequency, LumpSumType, Compounding } from "@/lib/mortgage";
 import { ScenarioComparison } from "@/components/scenario-comparison";
 import { PrintSummary } from "@/components/print-summary";
 import modernCentsLogo from "@assets/Big_logo_1777908930945.png";
@@ -42,6 +42,7 @@ export type ScenarioState = {
   lumpSumType: LumpSumType;
   lumpSumStartYear: number;
   lumpSumEndYear: number;
+  compounding: Compounding;
 };
 
 const todayIso = () => {
@@ -99,6 +100,7 @@ const defaultScenario: ScenarioState = {
   lumpSumType: "amount",
   lumpSumStartYear: 1,
   lumpSumEndYear: 25,
+  compounding: "semi-annual",
 };
 
 export default function Calculator() {
@@ -134,6 +136,7 @@ export default function Calculator() {
     lumpSumType: scenarioA.lumpSumType,
     lumpSumStartYear: scenarioA.lumpSumStartYear,
     lumpSumEndYear: scenarioA.lumpSumEndYear,
+    compounding: scenarioA.compounding,
     startDate: startDateA,
   }), [scenarioA, startDateA]);
 
@@ -147,6 +150,7 @@ export default function Calculator() {
     lumpSumType: scenarioB.lumpSumType,
     lumpSumStartYear: scenarioB.lumpSumStartYear,
     lumpSumEndYear: scenarioB.lumpSumEndYear,
+    compounding: scenarioB.compounding,
     startDate: startDateB,
   }), [scenarioB, startDateB]);
 

@@ -23,22 +23,22 @@ export const frequencyPeriods: Record<PaymentFrequency, number> = {
   "Accelerated weekly": 52,
 };
 
-export function getPerPeriodRate(annualRatePct: number, frequency: PaymentFrequency): number {
+export type Compounding = "semi-annual" | "monthly";
+
+export function getPerPeriodRate(
+  annualRatePct: number,
+  frequency: PaymentFrequency,
+  compounding: Compounding = "semi-annual",
+): number {
   if (annualRatePct === 0) return 0;
-  
+
   const nominalAnnual = annualRatePct / 100;
-  // Canadian mortgage interest convention: compounded semi-annually
-  const effectiveAnnualRate = Math.pow(1 + nominalAnnual / 2, 2) - 1;
-  
-  // Base periods per year used for rate calculation
-  let baseFrequency: PaymentFrequency = frequency;
-  if (frequency === "Accelerated semi-monthly") baseFrequency = "Monthly";
-  if (frequency === "Accelerated bi-weekly") baseFrequency = "Monthly";
-  if (frequency === "Accelerated weekly") baseFrequency = "Monthly";
-  
-  const periodsPerYear = frequencyPeriods[baseFrequency];
-  const perPeriodRate = Math.pow(1 + effectiveAnnualRate, 1 / periodsPerYear) - 1;
-  
+  // Canadian mortgage interest convention: fixed rates use semi-annual compounding (Interest Act).
+  // Most Big-6 banks compound variable rates monthly; mono-line lenders (e.g. First National, MCAP)
+  // typically use semi-annual — about a 0.04% effective-rate difference over a 5-year term.
+  const compoundsPerYear = compounding === "monthly" ? 12 : 2;
+  const effectiveAnnualRate = Math.pow(1 + nominalAnnual / compoundsPerYear, compoundsPerYear) - 1;
+
   const actualPeriodsPerYear = frequencyPeriods[frequency];
   return Math.pow(1 + effectiveAnnualRate, 1 / actualPeriodsPerYear) - 1;
 }
@@ -48,11 +48,13 @@ export function computePayment({
   annualRatePct,
   amortizationMonths,
   frequency,
+  compounding = "semi-annual",
 }: {
   principal: number;
   annualRatePct: number;
   amortizationMonths: number;
   frequency: PaymentFrequency;
+  compounding?: Compounding;
 }): number {
   if (principal <= 0) return 0;
   if (annualRatePct === 0) {
@@ -61,7 +63,7 @@ export function computePayment({
   }
 
   // Calculate monthly payment first for standard or accelerated
-  const monthlyRate = getPerPeriodRate(annualRatePct, "Monthly");
+  const monthlyRate = getPerPeriodRate(annualRatePct, "Monthly", compounding);
   const monthlyPayment =
     (principal * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -amortizationMonths));
 
@@ -72,7 +74,7 @@ export function computePayment({
   if (frequency === "Accelerated weekly") return monthlyPayment / 4;
 
   // Standard non-monthly calculations
-  const rate = getPerPeriodRate(annualRatePct, frequency);
+  const rate = getPerPeriodRate(annualRatePct, frequency, compounding);
   const totalPeriods = (amortizationMonths / 12) * frequencyPeriods[frequency];
   return (principal * rate) / (1 - Math.pow(1 + rate, -totalPeriods));
 }
@@ -102,6 +104,7 @@ export function buildSchedule({
   lumpSumStartYear = 1,
   lumpSumEndYear,
   startDate = new Date(),
+  compounding = "semi-annual",
 }: {
   principal: number;
   annualRatePct: number;
@@ -113,10 +116,11 @@ export function buildSchedule({
   lumpSumStartYear?: number;
   lumpSumEndYear?: number;
   startDate?: Date;
+  compounding?: Compounding;
 }): ScheduleRow[] {
   const schedule: ScheduleRow[] = [];
-  const rate = getPerPeriodRate(annualRatePct, frequency);
-  const regularPayment = computePayment({ principal, annualRatePct, amortizationMonths, frequency });
+  const rate = getPerPeriodRate(annualRatePct, frequency, compounding);
+  const regularPayment = computePayment({ principal, annualRatePct, amortizationMonths, frequency, compounding });
 
   const periodsPerYear = frequencyPeriods[frequency];
   const annualLumpAmount = !lumpSumValue || lumpSumValue <= 0

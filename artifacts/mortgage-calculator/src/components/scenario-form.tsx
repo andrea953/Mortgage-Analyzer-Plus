@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PaymentFrequency, LumpSumType } from "@/lib/mortgage";
+import { PaymentFrequency, LumpSumType, Compounding } from "@/lib/mortgage";
 import { Button } from "@/components/ui/button";
 
 type ScenarioFormProps = {
@@ -50,6 +50,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
       (v.lumpSumType === "amount" || v.lumpSumType === "percent") &&
       typeof v.lumpSumStartYear === "number" && !isNaN(v.lumpSumStartYear) &&
       typeof v.lumpSumEndYear === "number" && !isNaN(v.lumpSumEndYear) &&
+      (v.compounding === "semi-annual" || v.compounding === "monthly") &&
       (v.mode === "new" || v.mode === "current") &&
       (v.rateType === "fixed" || v.rateType === "variable") &&
       typeof v.primeRatePct === "number" && !isNaN(v.primeRatePct) &&
@@ -87,6 +88,13 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
       // Preserve effective rate by deriving spread from current annual rate
       const newSpread = Math.round(((values.annualRatePct ?? 0) - (values.primeRatePct ?? 0)) * 100) / 100;
       setValue("spreadPct", newSpread, { shouldDirty: true });
+      // Default to Monthly compounding for variable (Big-6 banks except Scotia)
+      if (values.compounding === "semi-annual") {
+        setValue("compounding", "monthly" as Compounding, { shouldDirty: true });
+      }
+    } else {
+      // Fixed mortgages are semi-annual by Interest Act
+      setValue("compounding", "semi-annual" as Compounding, { shouldDirty: true });
     }
     setValue("rateType", next, { shouldDirty: true });
   };
@@ -267,6 +275,37 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                 </div>
               </div>
 
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 pt-2 border-t border-border">
+                <div className="flex-1 min-w-0">
+                  <Label className="text-sm">Compounding</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Big-6 banks (except Scotia) use Monthly; mono-line lenders (First National, MCAP) use Semi-annual. ~0.04% rate variance.
+                  </p>
+                </div>
+                <div className="inline-flex rounded-md border border-border overflow-hidden self-start sm:self-auto">
+                  <Button
+                    type="button"
+                    variant={values.compounding === "monthly" ? "default" : "ghost"}
+                    size="sm"
+                    className="rounded-none h-8 px-3 text-xs font-medium"
+                    onClick={() => setValue("compounding", "monthly" as Compounding, { shouldDirty: true })}
+                    aria-pressed={values.compounding === "monthly"}
+                  >
+                    Monthly
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={values.compounding === "semi-annual" ? "default" : "ghost"}
+                    size="sm"
+                    className="rounded-none h-8 px-3 text-xs font-medium border-l border-border"
+                    onClick={() => setValue("compounding", "semi-annual" as Compounding, { shouldDirty: true })}
+                    aria-pressed={values.compounding === "semi-annual"}
+                  >
+                    Semi-annual
+                  </Button>
+                </div>
+              </div>
+
               <div className="flex justify-between items-center pt-2 border-t border-border">
                 <span className="text-sm font-medium">Effective Rate</span>
                 <div className="text-right">
@@ -277,6 +316,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                     Prime {(values.primeRatePct ?? 0).toFixed(2)}%
                     {" "}{(values.spreadPct ?? 0) >= 0 ? "+" : "−"}{" "}
                     {Math.abs(values.spreadPct ?? 0).toFixed(2)}%
+                    {" · "}{values.compounding === "monthly" ? "Monthly" : "Semi-annual"} compounding
                   </div>
                 </div>
               </div>

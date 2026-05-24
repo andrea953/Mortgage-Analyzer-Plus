@@ -134,7 +134,7 @@ function ScenarioBlock({
                 </>
               )}
               {scenario.rateType === "fixed" && " (fixed)"}
-              {" "}· Canadian semi-annual convention
+              {" "}· {scenario.compounding === "monthly" ? "Monthly" : "Semi-annual"} compounding
             </td>
           </tr>
           <tr>
