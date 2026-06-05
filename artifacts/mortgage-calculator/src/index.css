@@ -97,7 +97,7 @@
   --popover-foreground: 222 47% 11%;
   --popover-border: 214 32% 91%;
 
-  --primary: 222 47% 11%; /* Deep Ink */
+  --primary: 239 84% 60%; /* Brand Indigo */
   --primary-foreground: 210 40% 98%;
 
   --secondary: 210 40% 96%;
@@ -106,14 +106,14 @@
   --muted: 210 40% 96%;
   --muted-foreground: 215 16% 47%;
 
-  --accent: 189 94% 43%; /* Vibrant Cyan/Teal */
-  --accent-foreground: 222 47% 11%;
+  --accent: 264 70% 96%; /* Soft Lavender */
+  --accent-foreground: 271 60% 32%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 210 40% 98%;
 
   --input: 214 32% 91%;
-  --ring: 222 47% 11%;
+  --ring: 239 84% 60%;
 
   --chart-1: 239 84% 67%; /* Indigo */
   --chart-2: 271 91% 65%; /* Purple */
@@ -186,8 +186,8 @@
   --popover-foreground: 210 40% 98%;
   --popover-border: 215 25% 27%;
 
-  --primary: 210 40% 98%;
-  --primary-foreground: 222 47% 11%;
+  --primary: 239 84% 60%; /* Brand Indigo */
+  --primary-foreground: 210 40% 98%;
 
   --secondary: 224 40% 16%;
   --secondary-foreground: 210 40% 98%;
@@ -195,14 +195,14 @@
   --muted: 224 40% 16%;
   --muted-foreground: 215 20% 65%;
 
-  --accent: 189 94% 43%; /* Cyan */
-  --accent-foreground: 222 47% 11%;
+  --accent: 250 35% 26%; /* Muted Indigo */
+  --accent-foreground: 210 40% 98%;
 
   --destructive: 0 62% 30%;
   --destructive-foreground: 210 40% 98%;
 
   --input: 215 25% 27%;
-  --ring: 210 40% 98%;
+  --ring: 239 84% 67%;
 
   --chart-1: 239 84% 72%; /* Indigo */
   --chart-2: 271 91% 72%; /* Purple */

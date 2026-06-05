@@ -40,25 +40,25 @@ export function ScenarioResults({ summary, scenario }: ScenarioResultsProps) {
     <div className="space-y-6">
       {otherHousing > 0 ? (
         <>
-          <div className="p-6 bg-gradient-to-br from-indigo-500/80 via-purple-500/80 to-pink-500/80 text-white rounded-2xl shadow-lg relative overflow-hidden">
+          <div className="p-6 bg-gradient-to-br from-indigo-500/90 via-purple-500/90 to-pink-500/90 text-white rounded-2xl shadow-lg relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
               <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/><path d="M9 21v-6h6v6"/></svg>
             </div>
-            <h3 className="text-white/80 font-medium text-sm mb-2">Total Monthly Housing Cost</h3>
+            <h3 className="text-white/90 font-medium text-sm mb-2">Total Monthly Housing Cost</h3>
             <div className="text-4xl font-bold tracking-tight">
               <AnimatedNumber value={totalMonthlyHousing} format={formatCurrency} />
             </div>
             <div className="space-y-1.5 text-sm mt-4 pt-4 border-t border-white/20">
-              <div className="flex justify-between text-white/80">
+              <div className="flex justify-between text-white/90">
                 <span>Mortgage (monthly equiv.)</span>
                 <span className="tabular-nums text-white font-medium">{formatCurrency(monthlyMortgage)}</span>
               </div>
-              <div className="flex justify-between text-white/80">
+              <div className="flex justify-between text-white/90">
                 <span>Other housing costs</span>
                 <span className="tabular-nums text-white font-medium">{formatCurrency(otherHousing)}</span>
               </div>
             </div>
-            <p className="text-[11px] text-white/70 mt-3">
+            <p className="text-[11px] text-white/90 mt-3">
               ≈ {formatCurrency(totalMonthlyHousing * 12)} per year. Mortgage shown as a monthly equivalent of your recurring payment; one-off lump sums excluded.
             </p>
           </div>
@@ -80,16 +80,16 @@ export function ScenarioResults({ summary, scenario }: ScenarioResultsProps) {
           </Card>
         </>
       ) : (
-        <div className="p-6 bg-gradient-to-br from-indigo-500/80 via-purple-500/80 to-pink-500/80 text-white rounded-2xl shadow-lg relative overflow-hidden">
+        <div className="p-6 bg-gradient-to-br from-indigo-500/90 via-purple-500/90 to-pink-500/90 text-white rounded-2xl shadow-lg relative overflow-hidden">
           <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
             <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           </div>
-          <h3 className="text-white/80 font-medium text-sm mb-2">Total Mortgage Payment / {scenario.frequency}</h3>
+          <h3 className="text-white/90 font-medium text-sm mb-2">Total Mortgage Payment / {scenario.frequency}</h3>
           <div className="text-4xl font-bold tracking-tight">
             <AnimatedNumber value={summary.totalPayment} format={formatCurrency} />
           </div>
           {scenario.extraPerPeriod > 0 && (
-            <div className="text-sm text-white/80 mt-2">
+            <div className="text-sm text-white/90 mt-2">
               Includes <AnimatedNumber value={scenario.extraPerPeriod} format={formatCurrency} /> extra
             </div>
           )}
