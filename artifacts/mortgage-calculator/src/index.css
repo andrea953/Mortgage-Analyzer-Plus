@@ -115,11 +115,11 @@
   --input: 214 32% 91%;
   --ring: 222 47% 11%;
 
-  --chart-1: 189 94% 43%; /* Cyan */
-  --chart-2: 222 47% 11%; /* Ink */
-  --chart-3: 199 89% 48%; /* Light Blue */
-  --chart-4: 215 25% 27%; /* Slate */
-  --chart-5: 189 60% 60%; /* Muted Cyan */
+  --chart-1: 239 84% 67%; /* Indigo */
+  --chart-2: 271 91% 65%; /* Purple */
+  --chart-3: 330 81% 60%; /* Pink */
+  --chart-4: 258 90% 66%; /* Violet */
+  --chart-5: 292 84% 61%; /* Fuchsia */
 
   --app-font-sans: 'Geist', 'Inter', sans-serif;
   --app-font-serif: Georgia, serif;
@@ -204,11 +204,11 @@
   --input: 215 25% 27%;
   --ring: 210 40% 98%;
 
-  --chart-1: 189 94% 43%; /* Cyan */
-  --chart-2: 210 40% 98%; /* White/Light */
-  --chart-3: 199 89% 48%; /* Light Blue */
-  --chart-4: 215 25% 65%; /* Slate light */
-  --chart-5: 189 60% 60%; /* Muted Cyan */
+  --chart-1: 239 84% 72%; /* Indigo */
+  --chart-2: 271 91% 72%; /* Purple */
+  --chart-3: 330 85% 68%; /* Pink */
+  --chart-4: 258 90% 73%; /* Violet */
+  --chart-5: 292 84% 68%; /* Fuchsia */
 
   --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.20);
   --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.20);

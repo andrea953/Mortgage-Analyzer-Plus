@@ -70,8 +70,8 @@ export function AmortizationChart({ scheduleA, scenarioA, scheduleB, scenarioB, 
     "hsl(var(--chart-3))",
     "hsl(var(--chart-4))",
     "hsl(var(--chart-5))",
-    "hsl(262 60% 60%)",
-    "hsl(190 55% 50%)",
+    "hsl(345 82% 62%)",
+    "hsl(220 75% 62%)",
   ];
 
   const housingCategoryDefs = (s: ScenarioState) => {
