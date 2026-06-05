@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScenarioState } from "@/pages/Calculator";
 import { formatCurrency, formatPercent } from "@/lib/format";
 import { AnimatedNumber } from "@/components/animated-number";
+import { recurringMonthlyMortgage, sumHousingCosts } from "@/lib/mortgage";
 
 type ScenarioResultsProps = {
   summary: {
@@ -24,6 +25,17 @@ export function ScenarioResults({ summary, scenario }: ScenarioResultsProps) {
   const payoffYears = Math.floor(summary.payoffMonths / 12);
   const payoffRemainingMonths = summary.payoffMonths % 12;
 
+  const monthlyMortgage = recurringMonthlyMortgage({
+    principal: scenario.principal,
+    annualRatePct: scenario.annualRatePct,
+    amortizationMonths: scenario.amortizationYears * 12 + scenario.amortizationMonths,
+    frequency: scenario.frequency,
+    extraPerPeriod: scenario.extraPerPeriod,
+    compounding: scenario.compounding,
+  });
+  const otherHousing = sumHousingCosts(scenario);
+  const totalMonthlyHousing = monthlyMortgage + otherHousing;
+
   return (
     <div className="space-y-6">
       <div className="p-6 bg-primary text-primary-foreground rounded-2xl shadow-lg relative overflow-hidden">
@@ -40,6 +52,32 @@ export function ScenarioResults({ summary, scenario }: ScenarioResultsProps) {
           </div>
         )}
       </div>
+
+      {otherHousing > 0 && (
+        <Card className="bg-gradient-to-br from-card to-muted/30 border-border">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-baseline justify-between gap-3">
+              <h4 className="text-xs text-muted-foreground font-medium">Total Monthly Housing Cost</h4>
+              <div className="text-xl font-bold text-primary tracking-tight">
+                <AnimatedNumber value={totalMonthlyHousing} format={formatCurrency} />
+              </div>
+            </div>
+            <div className="space-y-1.5 text-xs">
+              <div className="flex justify-between text-muted-foreground">
+                <span>Mortgage (monthly equiv.)</span>
+                <span className="tabular-nums text-foreground">{formatCurrency(monthlyMortgage)}</span>
+              </div>
+              <div className="flex justify-between text-muted-foreground">
+                <span>Other housing costs</span>
+                <span className="tabular-nums text-foreground">{formatCurrency(otherHousing)}</span>
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground pt-1 border-t border-border">
+              ≈ {formatCurrency(totalMonthlyHousing * 12)} per year. Mortgage shown as a monthly equivalent of your recurring payment; one-off lump sums excluded.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <Card className="bg-card">

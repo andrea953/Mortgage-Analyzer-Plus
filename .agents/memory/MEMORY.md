@@ -1,0 +1,1 @@
+- [Mortgage calc form guards](mortgage-calc-rhf-guards.md) — adding a numeric field to scenario-form needs a guard line + setValueAs(0) or clearing it freezes the whole form.

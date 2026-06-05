@@ -81,6 +81,47 @@ export function computePayment({
 
 export type LumpSumType = "amount" | "percent";
 
+export type HousingCosts = {
+  propertyTaxMonthly: number;
+  condoFeesMonthly: number;
+  maintenanceMonthly: number;
+  utilitiesMonthly: number;
+  insuranceMonthly: number;
+  otherMonthly: number;
+};
+
+/** Recurring mortgage outflow expressed as a monthly figure (P&I plus recurring extra,
+ *  annualized by payment frequency then divided by 12). Excludes one-off lump sums. */
+export function recurringMonthlyMortgage({
+  principal,
+  annualRatePct,
+  amortizationMonths,
+  frequency,
+  extraPerPeriod,
+  compounding = "semi-annual",
+}: {
+  principal: number;
+  annualRatePct: number;
+  amortizationMonths: number;
+  frequency: PaymentFrequency;
+  extraPerPeriod: number;
+  compounding?: Compounding;
+}): number {
+  const pay = computePayment({ principal, annualRatePct, amortizationMonths, frequency, compounding });
+  return ((pay + (extraPerPeriod || 0)) * frequencyPeriods[frequency]) / 12;
+}
+
+export function sumHousingCosts(h: HousingCosts): number {
+  return (
+    (h.propertyTaxMonthly || 0) +
+    (h.condoFeesMonthly || 0) +
+    (h.maintenanceMonthly || 0) +
+    (h.utilitiesMonthly || 0) +
+    (h.insuranceMonthly || 0) +
+    (h.otherMonthly || 0)
+  );
+}
+
 export type ScheduleRow = {
   n: number;
   date: Date;

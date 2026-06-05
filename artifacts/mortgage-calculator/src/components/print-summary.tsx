@@ -1,6 +1,6 @@
 import React from "react";
 import { ScenarioState } from "@/pages/Calculator";
-import { ScheduleRow, PaymentFrequency } from "@/lib/mortgage";
+import { ScheduleRow, PaymentFrequency, recurringMonthlyMortgage, sumHousingCosts } from "@/lib/mortgage";
 import { formatCurrency } from "@/lib/format";
 import modernCentsLogo from "@assets/Big_logo_1777908930945.png";
 
@@ -102,6 +102,17 @@ function ScenarioBlock({
       : `${formatCurrency(scenario.lumpSumValue)} per anniversary${lumpSumYearRange}`
     : "None";
 
+  const monthlyMortgageEquiv = recurringMonthlyMortgage({
+    principal: scenario.principal,
+    annualRatePct: scenario.annualRatePct,
+    amortizationMonths: totalAmortMonths,
+    frequency: scenario.frequency,
+    extraPerPeriod: scenario.extraPerPeriod,
+    compounding: scenario.compounding,
+  });
+  const otherHousingMonthly = sumHousingCosts(scenario);
+  const totalMonthlyHousing = monthlyMortgageEquiv + otherHousingMonthly;
+
   return (
     <div className="ps-scenario">
       {label && <div className="ps-scenario-label">{label}</div>}
@@ -161,6 +172,12 @@ function ScenarioBlock({
             <th>Annual Lump Sum</th>
             <td>{lumpSumLabel}</td>
           </tr>
+          {otherHousingMonthly > 0 && (
+            <tr>
+              <th>Other Housing Costs</th>
+              <td>{formatCurrency(otherHousingMonthly)}/mo ({formatCurrency(otherHousingMonthly * 12)}/yr)</td>
+            </tr>
+          )}
         </tbody>
       </table>
 
@@ -205,6 +222,15 @@ function ScenarioBlock({
             {equityPctAtRenewal}% paid down
           </div>
         </div>
+        {otherHousingMonthly > 0 && (
+          <div className="ps-cell ps-cell-hero">
+            <div className="ps-cell-label">Total Monthly Housing Cost</div>
+            <div className="ps-cell-value">{formatCurrency(totalMonthlyHousing)}</div>
+            <div className="ps-cell-sub">
+              Mortgage {formatCurrency(monthlyMortgageEquiv)} + other {formatCurrency(otherHousingMonthly)} · ≈ {formatCurrency(totalMonthlyHousing * 12)}/yr
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Year-end snapshot */}

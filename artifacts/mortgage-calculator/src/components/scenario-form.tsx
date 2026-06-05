@@ -51,6 +51,12 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
       typeof v.lumpSumStartYear === "number" && !isNaN(v.lumpSumStartYear) &&
       typeof v.lumpSumEndYear === "number" && !isNaN(v.lumpSumEndYear) &&
       (v.compounding === "semi-annual" || v.compounding === "monthly") &&
+      typeof v.propertyTaxMonthly === "number" && !isNaN(v.propertyTaxMonthly) &&
+      typeof v.condoFeesMonthly === "number" && !isNaN(v.condoFeesMonthly) &&
+      typeof v.maintenanceMonthly === "number" && !isNaN(v.maintenanceMonthly) &&
+      typeof v.utilitiesMonthly === "number" && !isNaN(v.utilitiesMonthly) &&
+      typeof v.insuranceMonthly === "number" && !isNaN(v.insuranceMonthly) &&
+      typeof v.otherMonthly === "number" && !isNaN(v.otherMonthly) &&
       (v.mode === "new" || v.mode === "current") &&
       (v.rateType === "fixed" || v.rateType === "variable") &&
       typeof v.primeRatePct === "number" && !isNaN(v.primeRatePct) &&
@@ -77,6 +83,13 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
 
   const isCurrent = values.mode === "current";
   const isVariable = values.rateType === "variable";
+  const otherHousingTotal =
+    (values.propertyTaxMonthly || 0) +
+    (values.condoFeesMonthly || 0) +
+    (values.maintenanceMonthly || 0) +
+    (values.utilitiesMonthly || 0) +
+    (values.insuranceMonthly || 0) +
+    (values.otherMonthly || 0);
   const effectiveVariableRate = Math.max(
     0,
     Math.round(((values.primeRatePct ?? 0) + (values.spreadPct ?? 0)) * 100) / 100,
@@ -502,6 +515,50 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                 {" "}({Math.max(0, (values.lumpSumEndYear || 0) - (values.lumpSumStartYear || 0) + 1)} payment{Math.max(0, (values.lumpSumEndYear || 0) - (values.lumpSumStartYear || 0) + 1) === 1 ? "" : "s"}).
               </p>
             </div>
+          )}
+        </div>
+
+        {/* Other Housing Costs */}
+        <div className="space-y-3 pt-4 border-t border-border">
+          <div>
+            <Label>Other Monthly Housing Costs</Label>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Recurring ownership costs beyond the mortgage — for a total cost-of-ownership picture
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {([
+              { key: "propertyTaxMonthly", label: "Property Tax" },
+              { key: "condoFeesMonthly", label: "Condo / Strata Fees" },
+              { key: "maintenanceMonthly", label: "Maintenance" },
+              { key: "utilitiesMonthly", label: "Utilities" },
+              { key: "insuranceMonthly", label: "Home Insurance" },
+              { key: "otherMonthly", label: "Other" },
+            ] as const).map(({ key, label }) => (
+              <div key={key} className="space-y-1">
+                <Label htmlFor={key} className="text-xs text-muted-foreground">{label}</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1.5 text-muted-foreground pointer-events-none">$</span>
+                  <Input
+                    id={key}
+                    type="number"
+                    min={0}
+                    step={10}
+                    placeholder="0"
+                    className="pl-7 text-right h-9"
+                    {...register(key, {
+                      setValueAs: (v) => (v === "" || v === null || isNaN(Number(v)) ? 0 : Number(v)),
+                    })}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          {otherHousingTotal > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Adds ${otherHousingTotal.toLocaleString("en-CA", { maximumFractionDigits: 0 })}/mo
+              {" "}(${(otherHousingTotal * 12).toLocaleString("en-CA", { maximumFractionDigits: 0 })}/yr) on top of the mortgage.
+            </p>
           )}
         </div>
 

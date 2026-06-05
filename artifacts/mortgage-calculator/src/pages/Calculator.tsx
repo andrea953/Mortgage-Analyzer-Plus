@@ -43,6 +43,12 @@ export type ScenarioState = {
   lumpSumStartYear: number;
   lumpSumEndYear: number;
   compounding: Compounding;
+  propertyTaxMonthly: number;
+  condoFeesMonthly: number;
+  maintenanceMonthly: number;
+  utilitiesMonthly: number;
+  insuranceMonthly: number;
+  otherMonthly: number;
 };
 
 const todayIso = () => {
@@ -101,6 +107,12 @@ const defaultScenario: ScenarioState = {
   lumpSumStartYear: 1,
   lumpSumEndYear: 25,
   compounding: "semi-annual",
+  propertyTaxMonthly: 0,
+  condoFeesMonthly: 0,
+  maintenanceMonthly: 0,
+  utilitiesMonthly: 0,
+  insuranceMonthly: 0,
+  otherMonthly: 0,
 };
 
 export default function Calculator() {
