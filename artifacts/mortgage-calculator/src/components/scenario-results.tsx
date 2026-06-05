@@ -42,7 +42,7 @@ export function ScenarioResults({ summary, scenario }: ScenarioResultsProps) {
         <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
           <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         </div>
-        <h3 className="text-primary-foreground/80 font-medium text-sm mb-2">Total Payment / {scenario.frequency}</h3>
+        <h3 className="text-primary-foreground/80 font-medium text-sm mb-2">Total Mortgage Payment / {scenario.frequency}</h3>
         <div className="text-4xl font-bold tracking-tight">
           <AnimatedNumber value={summary.totalPayment} format={formatCurrency} />
         </div>
@@ -54,25 +54,25 @@ export function ScenarioResults({ summary, scenario }: ScenarioResultsProps) {
       </div>
 
       {otherHousing > 0 && (
-        <Card className="bg-gradient-to-br from-card to-muted/30 border-border">
-          <CardContent className="p-4 space-y-3">
+        <Card className="bg-gradient-to-br from-card to-muted/40 border-2 border-primary/30 ring-1 ring-primary/10 shadow-lg rounded-2xl">
+          <CardContent className="p-5 space-y-3">
             <div className="flex items-baseline justify-between gap-3">
-              <h4 className="text-xs text-muted-foreground font-medium">Total Monthly Housing Cost</h4>
-              <div className="text-xl font-bold text-primary tracking-tight">
+              <h4 className="text-sm font-semibold text-foreground">Total Monthly Housing Cost</h4>
+              <div className="text-3xl font-bold text-primary tracking-tight">
                 <AnimatedNumber value={totalMonthlyHousing} format={formatCurrency} />
               </div>
             </div>
-            <div className="space-y-1.5 text-xs">
+            <div className="space-y-1.5 text-sm">
               <div className="flex justify-between text-muted-foreground">
                 <span>Mortgage (monthly equiv.)</span>
-                <span className="tabular-nums text-foreground">{formatCurrency(monthlyMortgage)}</span>
+                <span className="tabular-nums text-foreground font-medium">{formatCurrency(monthlyMortgage)}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Other housing costs</span>
-                <span className="tabular-nums text-foreground">{formatCurrency(otherHousing)}</span>
+                <span className="tabular-nums text-foreground font-medium">{formatCurrency(otherHousing)}</span>
               </div>
             </div>
-            <p className="text-[11px] text-muted-foreground pt-1 border-t border-border">
+            <p className="text-[11px] text-muted-foreground pt-2 border-t border-border">
               ≈ {formatCurrency(totalMonthlyHousing * 12)} per year. Mortgage shown as a monthly equivalent of your recurring payment; one-off lump sums excluded.
             </p>
           </CardContent>

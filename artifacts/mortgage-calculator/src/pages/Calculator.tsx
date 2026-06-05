@@ -296,11 +296,6 @@ export default function Calculator() {
                   />
                 )}
                 <ScenarioForm state={scenarioA} onChange={setScenarioA} />
-                {!isCompare && (
-                  <div className="mt-8 pt-8 border-t">
-                    <ScenarioResults summary={summaryA} scenario={scenarioA} />
-                  </div>
-                )}
               </div>
 
               {isCompare ? (
@@ -315,6 +310,7 @@ export default function Calculator() {
                 </div>
               ) : (
                 <div className="lg:col-span-8 space-y-6 sm:space-y-8">
+                  <ScenarioResults summary={summaryA} scenario={scenarioA} />
                   <AmortizationChart
                     scheduleA={scheduleA}
                     scenarioA={scenarioA}
