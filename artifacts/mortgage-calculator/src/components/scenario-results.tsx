@@ -40,7 +40,7 @@ export function ScenarioResults({ summary, scenario }: ScenarioResultsProps) {
     <div className="space-y-6">
       {otherHousing > 0 ? (
         <>
-          <div className="p-6 bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700 text-white rounded-2xl shadow-lg relative overflow-hidden">
+          <div className="p-6 bg-gradient-to-br from-indigo-500/80 via-purple-500/80 to-pink-500/80 text-white rounded-2xl shadow-lg relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
               <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/><path d="M9 21v-6h6v6"/></svg>
             </div>
@@ -80,7 +80,7 @@ export function ScenarioResults({ summary, scenario }: ScenarioResultsProps) {
           </Card>
         </>
       ) : (
-        <div className="p-6 bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700 text-white rounded-2xl shadow-lg relative overflow-hidden">
+        <div className="p-6 bg-gradient-to-br from-indigo-500/80 via-purple-500/80 to-pink-500/80 text-white rounded-2xl shadow-lg relative overflow-hidden">
           <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
             <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           </div>
