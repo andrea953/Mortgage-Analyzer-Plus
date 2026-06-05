@@ -179,8 +179,60 @@ export default function Calculator() {
     [renewalOptions, renewalBalance, remainingAmortMonths, renewalDate],
   );
 
+  const handlePrint = () => {
+    const root = document.querySelector(".print-summary") as HTMLElement | null;
+    const fit = root?.querySelector(".ps-fit") as HTMLElement | null;
+    if (!root || !fit) {
+      window.print();
+      return;
+    }
+
+    // Letter page content area at 96dpi with 0.5in margins: 7.5in x 10in.
+    // PAGE_H trimmed slightly for rounding / engine variance safety.
+    const PAGE_W = 720;
+    const PAGE_H = 950;
+
+    // Render off-screen at the print width to measure true content height.
+    const saved = root.getAttribute("style") ?? "";
+    Object.assign(root.style, {
+      display: "block",
+      position: "fixed",
+      left: "-10000px",
+      top: "0",
+      width: `${PAGE_W}px`,
+      visibility: "hidden",
+    } as Partial<CSSStyleDeclaration>);
+
+    const contentH = fit.scrollHeight;
+    const scale = contentH > PAGE_H ? PAGE_H / contentH : 1;
+
+    // Restore on-screen styles, keep only the print variables.
+    root.setAttribute("style", saved);
+    root.classList.add("ps-scaled");
+    root.style.setProperty("--print-scale", scale.toFixed(4));
+    root.style.setProperty("--print-h", `${Math.ceil(contentH * scale)}px`);
+
+    let cleaned = false;
+    const cleanup = () => {
+      if (cleaned) return;
+      cleaned = true;
+      root.classList.remove("ps-scaled");
+      root.style.removeProperty("--print-scale");
+      root.style.removeProperty("--print-h");
+      window.removeEventListener("afterprint", cleanup);
+    };
+    window.addEventListener("afterprint", cleanup);
+
+    // Defer one frame so the scale vars apply before the print snapshot,
+    // and add a fallback in case afterprint never fires (cancel/engine paths).
+    requestAnimationFrame(() => {
+      window.print();
+      setTimeout(cleanup, 1500);
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-background text-foreground pb-20">
+    <div className="min-h-screen bg-background text-foreground pb-20 print:min-h-0 print:pb-0">
       <header className="border-b sticky top-0 z-10 bg-background/80 backdrop-blur-md print:hidden">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
@@ -212,7 +264,7 @@ export default function Calculator() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.print()}
+              onClick={handlePrint}
               className="gap-2 h-8 sm:h-9 px-2 sm:px-3"
               data-testid="button-print"
               aria-label="Print Summary"

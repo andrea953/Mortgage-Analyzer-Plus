@@ -307,6 +307,7 @@ export function PrintSummary({
     : undefined;
   return (
     <div className="hidden print:block print-summary" data-no-renewal={renewalSection ? undefined : "true"}>
+      <div className="ps-fit">
       {/* Header */}
       <div className="ps-header">
         <div className="ps-header-left">
@@ -453,6 +454,7 @@ export function PrintSummary({
         For informational purposes only. Not financial advice. Calculations assume the
         stated rate is fixed for the entire amortization for illustration; actual mortgage
         rates may change at each renewal. Verify all figures with your mortgage professional.
+      </div>
       </div>
     </div>
   );

@@ -311,6 +311,22 @@
   .print-summary[data-no-renewal="true"] .ps-footer {
     margin-top: 0.6rem;
   }
+
+  /* Auto-fit: JS measures the rendered summary and sets --print-scale / --print-h
+     so the whole report always shrinks to fit exactly one Letter page. */
+  .print-summary.ps-scaled {
+    position: relative;
+    height: var(--print-h);
+    overflow: hidden;
+  }
+  .print-summary.ps-scaled .ps-fit {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: scale(var(--print-scale, 1));
+    transform-origin: top left;
+    width: calc(100% / var(--print-scale, 1));
+  }
 }
 
 .print-summary {
