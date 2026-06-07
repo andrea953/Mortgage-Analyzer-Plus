@@ -214,20 +214,22 @@ export function buildSchedule({
   let n = 1;
   let currentDate = new Date(startDate);
 
+  const freqLower = frequency.toLowerCase();
+
   while (balance > 0.005 && n <= 10000) {
     if (frequency === "Annual") currentDate.setFullYear(currentDate.getFullYear() + 1);
     else if (frequency === "Semi-annual") currentDate.setMonth(currentDate.getMonth() + 6);
     else if (frequency === "Quarterly") currentDate.setMonth(currentDate.getMonth() + 3);
     else if (frequency === "Monthly") currentDate.setMonth(currentDate.getMonth() + 1);
-    else if (frequency.includes("semi-monthly")) {
+    else if (freqLower.includes("semi-monthly")) {
       if (currentDate.getDate() <= 15) currentDate.setDate(currentDate.getDate() + 15);
       else {
         currentDate.setMonth(currentDate.getMonth() + 1);
         currentDate.setDate(currentDate.getDate() - 15);
       }
     }
-    else if (frequency.includes("bi-weekly")) currentDate.setDate(currentDate.getDate() + 14);
-    else if (frequency.includes("weekly")) currentDate.setDate(currentDate.getDate() + 7);
+    else if (freqLower.includes("bi-weekly")) currentDate.setDate(currentDate.getDate() + 14);
+    else if (freqLower.includes("weekly")) currentDate.setDate(currentDate.getDate() + 7);
 
     const interest = balance * rate;
     let payment = regularPayment;
