@@ -429,6 +429,11 @@ export function RenewalPlanner({
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="year" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
                 <YAxis
+                  domain={[
+                    (dataMin: number) => Math.max(0, Math.floor((dataMin * 0.97) / 1000) * 1000),
+                    (dataMax: number) => Math.ceil((dataMax * 1.03) / 1000) * 1000,
+                  ]}
+                  allowDecimals={false}
                   tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
                   tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
                 />
