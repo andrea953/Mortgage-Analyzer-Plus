@@ -14,3 +14,7 @@ description: Why clearing a numeric field can freeze the whole scenario form, an
 2. Register the input with `setValueAs: (v) => (v === "" || v === null || isNaN(Number(v)) ? 0 : Number(v))` (not `valueAsNumber`) so cleared/optional fields coerce to 0 and never block the guard.
    - Required fields where blank should be rejected can keep `valueAsNumber`, but then expect the form to pause until refilled.
 Also remember to add the field to `defaultScenario` (scenario B inherits via `{ ...defaultScenario }`).
+
+## Escape hatch: helper inputs that are NOT part of ScenarioState
+
+For auxiliary inputs that compute a value and then write into existing ScenarioState fields (e.g. the "Don't know your remaining amortization?" helper that derives amortization from a current payment), keep them in **local `useState`**, NOT RHF `register`. Local state never enters the `form.watch` guard, so a blank/NaN helper input can't freeze the form. Apply the result with `setValue("amortizationYears"/"amortizationMonths", ...)`, which flows through the normal guard. This is the preferred pattern for any "calculator within the form" widget.

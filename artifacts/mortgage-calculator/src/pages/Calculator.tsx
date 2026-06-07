@@ -1,9 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useGetPrimeRate, getGetPrimeRateQueryKey } from "@workspace/api-client-react";
-import { Moon, Sun, Printer, Calculator as CalculatorIcon, RefreshCw, Pencil } from "lucide-react";
+import { Moon, Sun, Printer, Calculator as CalculatorIcon, RefreshCw, Pencil, Columns2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTheme } from "@/components/theme-provider";
 import { ScenarioForm } from "@/components/scenario-form";
@@ -314,16 +313,6 @@ export default function Calculator() {
               <Printer className="h-4 w-4" />
               <span className="hidden md:inline">Print Summary</span>
             </Button>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <label htmlFor="compare-mode" className="text-xs sm:text-sm font-medium cursor-pointer">
-                Compare
-              </label>
-              <Switch
-                id="compare-mode"
-                checked={isCompare}
-                onCheckedChange={setIsCompare}
-              />
-            </div>
             <Button
               variant="ghost"
               size="icon"
@@ -403,16 +392,32 @@ export default function Calculator() {
           />
         </div>
         <Tabs value={tab} onValueChange={(v) => setTab(v as "calculator" | "renewal")}>
-          <TabsList className="mb-4 sm:mb-6 w-full sm:w-auto">
-            <TabsTrigger value="calculator" className="gap-2">
-              <CalculatorIcon className="h-4 w-4" />
-              Calculator
-            </TabsTrigger>
-            <TabsTrigger value="renewal" className="gap-2">
-              <RefreshCw className="h-4 w-4" />
-              Renewal Planner
-            </TabsTrigger>
-          </TabsList>
+          <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <TabsList className="w-full sm:w-auto">
+              <TabsTrigger value="calculator" className="gap-2">
+                <CalculatorIcon className="h-4 w-4" />
+                Calculator
+              </TabsTrigger>
+              <TabsTrigger value="renewal" className="gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Renewal Planner
+              </TabsTrigger>
+            </TabsList>
+            {tab === "calculator" && (
+              <Button
+                type="button"
+                variant={isCompare ? "default" : "outline"}
+                size="sm"
+                onClick={() => setIsCompare((v) => !v)}
+                className="gap-2 w-full sm:w-auto"
+                aria-pressed={isCompare}
+                data-testid="button-compare"
+              >
+                <Columns2 className="h-4 w-4" />
+                {isCompare ? "Comparing two scenarios" : "Compare two scenarios"}
+              </Button>
+            )}
+          </div>
 
           <TabsContent value="calculator" className="space-y-6 sm:space-y-8 mt-0">
             <div className={`grid grid-cols-1 ${isCompare ? 'lg:grid-cols-2' : 'lg:grid-cols-12'} gap-6 sm:gap-8 items-start`}>

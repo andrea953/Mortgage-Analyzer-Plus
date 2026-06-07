@@ -80,6 +80,43 @@ export function computePayment({
   return (principal * rate) / (1 - Math.pow(1 + rate, -totalPeriods));
 }
 
+/**
+ * Solve for the remaining amortization (in whole months) given a current balance,
+ * rate, payment frequency, and the regular principal+interest payment the borrower
+ * actually makes. Useful when someone knows their payment but not how many years
+ * are left. Returns null when the payment is too small to ever amortize the balance.
+ */
+export function estimateAmortizationMonthsFromPayment({
+  balance,
+  annualRatePct,
+  payment,
+  frequency,
+  compounding = "semi-annual",
+}: {
+  balance: number;
+  annualRatePct: number;
+  payment: number;
+  frequency: PaymentFrequency;
+  compounding?: Compounding;
+}): number | null {
+  if (balance <= 0 || payment <= 0) return null;
+  const periodsPerYear = frequencyPeriods[frequency];
+
+  if (annualRatePct === 0) {
+    const periods = balance / payment;
+    return Math.max(1, Math.round((periods / periodsPerYear) * 12));
+  }
+
+  const rate = getPerPeriodRate(annualRatePct, frequency, compounding);
+  // Payment must exceed the first period's interest, otherwise the balance never falls.
+  if (payment <= balance * rate) return null;
+
+  const periods = -Math.log(1 - (rate * balance) / payment) / Math.log(1 + rate);
+  if (!isFinite(periods) || periods <= 0) return null;
+
+  return Math.max(1, Math.round((periods / periodsPerYear) * 12));
+}
+
 export type LumpSumType = "amount" | "percent";
 
 export type HousingCosts = {

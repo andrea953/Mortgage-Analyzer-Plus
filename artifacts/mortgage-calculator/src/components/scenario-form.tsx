@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ScenarioState, BalanceMode, RateType } from "@/pages/Calculator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PaymentFrequency, LumpSumType, Compounding } from "@/lib/mortgage";
+import { PaymentFrequency, LumpSumType, Compounding, estimateAmortizationMonthsFromPayment } from "@/lib/mortgage";
 import { Button } from "@/components/ui/button";
 
 type ScenarioFormProps = {
@@ -35,6 +35,9 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
 
   const { watch, setValue, register } = form;
   const values = watch();
+
+  const [showAmortHelper, setShowAmortHelper] = useState(false);
+  const [helperPayment, setHelperPayment] = useState("");
 
   useEffect(() => {
     const sub = form.watch((v) => {
@@ -94,6 +97,28 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
     0,
     Math.round(((values.primeRatePct ?? 0) + (values.spreadPct ?? 0)) * 100) / 100,
   );
+
+  const helperPaymentNum = parseFloat(helperPayment);
+  const derivedAmortMonths =
+    showAmortHelper && !isNaN(helperPaymentNum) && helperPaymentNum > 0
+      ? estimateAmortizationMonthsFromPayment({
+          balance: values.principal,
+          annualRatePct: values.annualRatePct,
+          payment: helperPaymentNum,
+          frequency: values.frequency,
+          compounding: values.compounding,
+        })
+      : null;
+  const derivedAmortYears = derivedAmortMonths != null ? Math.floor(derivedAmortMonths / 12) : 0;
+  const derivedAmortRemMonths = derivedAmortMonths != null ? derivedAmortMonths % 12 : 0;
+
+  const applyDerivedAmortization = () => {
+    if (derivedAmortMonths == null) return;
+    setValue("amortizationYears", derivedAmortYears, { shouldDirty: true });
+    setValue("amortizationMonths", derivedAmortRemMonths, { shouldDirty: true });
+    setShowAmortHelper(false);
+    setHelperPayment("");
+  };
 
   const handleRateTypeChange = (next: RateType) => {
     if (next === values.rateType) return;
@@ -368,6 +393,79 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
             onValueChange={([val]) => setValue("amortizationYears", val)}
             className="py-2"
           />
+          {isCurrent && (
+            <div className="pt-1">
+              {!showAmortHelper ? (
+                <button
+                  type="button"
+                  onClick={() => setShowAmortHelper(true)}
+                  className="text-xs text-primary underline-offset-2 hover:underline"
+                >
+                  Don't know your remaining amortization?
+                </button>
+              ) : (
+                <div className="space-y-2 rounded-md border border-border bg-muted/30 p-3">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                    <div className="flex-1 min-w-0">
+                      <Label htmlFor="helperPayment" className="text-sm">Current regular payment</Label>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Your principal + interest payment per {values.frequency.toLowerCase()} period (exclude taxes, fees, extra)
+                      </p>
+                    </div>
+                    <div className="relative w-full sm:w-32">
+                      <span className="absolute left-3 top-1.5 text-muted-foreground">$</span>
+                      <Input
+                        id="helperPayment"
+                        type="number"
+                        inputMode="decimal"
+                        className="pl-7 text-right"
+                        value={helperPayment}
+                        onChange={(e) => setHelperPayment(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  {helperPayment.trim() !== "" && (
+                    derivedAmortMonths != null ? (
+                      <p className="text-xs text-muted-foreground">
+                        Estimated remaining amortization:{" "}
+                        <span className="font-medium text-foreground">
+                          {derivedAmortYears} yr{derivedAmortYears === 1 ? "" : "s"}
+                          {derivedAmortRemMonths > 0 ? ` ${derivedAmortRemMonths} mo${derivedAmortRemMonths === 1 ? "" : "s"}` : ""}
+                        </span>
+                      </p>
+                    ) : (
+                      <p className="text-xs text-destructive">
+                        That payment is too low to pay down this balance at the current rate. Check the amount.
+                      </p>
+                    )
+                  )}
+                  <div className="flex items-center gap-2 pt-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="h-8 text-xs"
+                      disabled={derivedAmortMonths == null}
+                      onClick={applyDerivedAmortization}
+                    >
+                      Use this estimate
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 text-xs"
+                      onClick={() => {
+                        setShowAmortHelper(false);
+                        setHelperPayment("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Term */}
