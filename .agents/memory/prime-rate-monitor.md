@@ -3,22 +3,34 @@ name: Prime-rate monitor architecture (Modern Cents)
 description: How the automated Canadian prime-rate check + in-app banner is wired and why.
 ---
 
-The mortgage calculator's automated prime-rate alert is a chain:
-scheduled job → DB → api-server → client banner.
+The mortgage calculator's automated prime-rate refresh is a chain:
+api-server (lazy refresh) → DB → client banner + scenario seeding.
 
-- Job: `scripts/src/check-prime-rate.ts` fetches BoC Valet series `V80691311`
-  (free, no key) and upserts one row per `observed_date` into `prime_rate_readings`.
-  Run via `pnpm --filter @workspace/scripts run check-prime-rate`. Intended to run as
-  a separate **Scheduled Deployment** (shares the prod DB), NOT the main app deploy.
-- API: `GET /api/prime-rate` returns the latest reading; 404 when none.
+- Source of truth: `lib/db/src/prime-rate.ts` — `fetchPrimeRateFromBoC()` (BoC Valet
+  series `V80691311`, free/no key, 5s timeout), `upsertPrimeRate()` (idempotent on
+  `observed_date`), `getLatestPrimeRate()`, and `ensureFreshPrimeRate()`.
+- API: `GET /api/prime-rate` calls `ensureFreshPrimeRate()`: returns stored reading,
+  but if missing or older than 12h it fetches from BoC and upserts, then returns.
+  Resilient — on fetch failure it serves the existing stale row (never throws); 404
+  only when there is genuinely nothing. Throttle: per-instance module-level
+  `lastFetchAttempt`, 30min when a stale fallback exists, 30s on cold start.
+- `scripts/src/check-prime-rate.ts` still exists as a thin manual one-off refresh
+  reusing the same helpers (NOT required in production anymore).
 - Banner: `PrimeRateBanner` compares live prime to the CODE default
   (`DEFAULT_PRIME_RATE_PCT` in `Calculator.tsx`) client-side; shows only if drift ≥ 0.01.
 
-**Why this shape:** comparison is against the code constant, so the banner clears
-itself once someone updates `DEFAULT_PRIME_RATE_PCT` and redeploys — no DB "baseline"
-column and no acknowledge endpoint to drift out of sync. Keep it that way.
+**Why lazy-refresh, not a Scheduled Deployment:** this repl deploys as ONE unified
+autoscale deployment (`router = "application"` in `.replit`) — calculator static at `/`,
+api-server process at `/api`. One repl = one deployment, so a separate Scheduled
+Deployment cron isn't available. Lazy refresh on read needs no extra infra and works
+the moment the app is published.
 
-**How to apply:** the banner is pure progressive enhancement — if the API errors or
-has no data it renders nothing, preserving the static-first/SEO calculator. Don't make
-the calculator depend on the API. Production needs (a) the `prime_rate_readings` table
-pushed to the prod DB and (b) the Scheduled Deployment created before alerts work live.
+**Why compare against the code constant:** the banner clears itself once someone bumps
+`DEFAULT_PRIME_RATE_PCT` and redeploys — no DB "baseline" column / acknowledge endpoint
+to drift out of sync. Keep it that way.
+
+**How to apply / production:** banner + seeding are pure progressive enhancement — if the
+API errors or has no data the calculator still works (static-first/SEO). Don't make the
+calculator depend on the API. The only production prerequisite is the `prime_rate_readings`
+table, which Replit's Publish flow migrates to prod automatically (do NOT hand-write prod
+migrations). On first prod request the api-server self-populates the table from BoC.

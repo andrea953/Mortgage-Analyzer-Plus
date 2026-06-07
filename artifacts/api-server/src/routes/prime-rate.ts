@@ -1,19 +1,14 @@
 import { Router, type IRouter } from "express";
-import { desc } from "drizzle-orm";
-import { db, primeRateReadingsTable } from "@workspace/db";
+import { ensureFreshPrimeRate } from "@workspace/db";
 import { GetPrimeRateResponse } from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
 router.get("/prime-rate", async (req, res): Promise<void> => {
-  const [latest] = await db
-    .select()
-    .from(primeRateReadingsTable)
-    .orderBy(desc(primeRateReadingsTable.observedDate))
-    .limit(1);
+  const latest = await ensureFreshPrimeRate();
 
   if (!latest) {
-    req.log.info("No prime rate readings recorded yet");
+    req.log.info("No prime rate reading available (upstream fetch unavailable)");
     res.status(404).json({ error: "No prime rate reading available yet" });
     return;
   }
