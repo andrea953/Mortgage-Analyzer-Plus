@@ -366,6 +366,26 @@ export default function Calculator() {
       />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8 print:hidden">
+        <section className="mb-4 sm:mb-6 rounded-2xl border border-border/60 bg-card/40 p-5 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-foreground">
+            Model your Canadian mortgage with confidence
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+            Estimate your monthly payment, total interest, and balance at renewal
+            using Canadian mortgage conventions—including semi-annual interest
+            compounding for fixed rates and live Bank of Canada prime tracking for
+            variable rates. Adjust your loan amount, rate, amortization, payment
+            frequency, and lump-sum prepayments to see the impact instantly. Use{" "}
+            <span className="font-medium text-foreground">Compare</span> to weigh
+            two scenarios side by side, or the{" "}
+            <span className="font-medium text-foreground">Renewal Planner</span> to
+            project your options at the end of a term.
+          </p>
+          <p className="mt-3 text-xs text-muted-foreground/80">
+            For estimation purposes only. Actual rates, payments, and terms are set
+            by your lender.
+          </p>
+        </section>
         <div className="mb-4 sm:mb-6">
           <PrimeRateBanner appPrimeRatePct={DEFAULT_PRIME_RATE_PCT} />
         </div>
