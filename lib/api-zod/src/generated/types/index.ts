@@ -6,4 +6,6 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./apiErrorMessage";
 export * from "./healthStatus";
+export * from "./primeRateStatus";

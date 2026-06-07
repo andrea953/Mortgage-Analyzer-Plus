@@ -1,10 +1,56 @@
-# Runbook — Quarterly Prime Rate Review & Update
+# Runbook — Prime Rate Review & Update
 
 **App:** Modern Cents (mortgage calculator)
 **Purpose:** Keep the default **prime rate** used by the calculator in sync with the
 Canadian prime rate after each Bank of Canada (BoC) interest-rate announcement.
 **Owner:** _(assign a person/role)_
 **Last reviewed:** _(fill in YYYY-MM-DD each time you run this)_
+
+> **You no longer have to remember to check this manually.** An automated job now
+> watches the live BoC prime rate and raises an **in-app banner** inside the
+> calculator whenever it drifts from the app default. When you see that banner,
+> follow the [Procedure](#procedure) below to update the default. The manual update
+> is still the fix — the automation only tells you *when* to do it.
+
+---
+
+## Automated monitoring (in-app banner)
+
+A scheduled check keeps an eye on the prime rate for you. Here is how the pieces fit
+together:
+
+1. **Scheduled job** — `scripts/src/check-prime-rate.ts` fetches the latest prime
+   rate from the Bank of Canada Valet API (series `V80691311`, free, no API key) and
+   records it in the database table `prime_rate_readings`.
+   - Run command: `pnpm --filter @workspace/scripts run check-prime-rate`
+2. **API** — the API server exposes the most recent reading at `GET /api/prime-rate`.
+3. **Banner** — the calculator calls that endpoint and, if the live prime differs
+   from the app default (`defaultScenario.primeRatePct`) by 0.01 or more, shows a
+   dismissible banner: *"Prime rate update available…"*. If the API is unreachable or
+   has no data yet, nothing is shown — the calculator works exactly as before.
+
+Because the banner compares the live rate against the **code default**, it clears
+itself automatically once you update `defaultScenario.primeRatePct` and redeploy
+(see the [Procedure](#procedure)). There is no separate "acknowledge" step.
+
+### Set up the scheduled job (one-time)
+
+The job must run on a schedule in production. Set it up as a **Scheduled Deployment**:
+
+1. Open the **Publishing** tool and create a **Scheduled** deployment (this is a
+   separate deployment from the main app — it shares the same database).
+2. **Run command:** `pnpm --filter @workspace/scripts run check-prime-rate`
+3. **Schedule:** weekly is plenty (prime only moves on BoC announcement dates, ~8×/yr).
+   Running it the day after each [BoC announcement](#references), or simply every
+   Monday, both work well.
+4. The job is a one-shot script: it fetches, writes one row, and exits.
+
+To run the check on demand (e.g. to seed the database or test), run the same command
+from the shell:
+
+```bash
+pnpm --filter @workspace/scripts run check-prime-rate
+```
 
 ---
 

@@ -14,3 +14,18 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Returns the most recent Canadian prime rate reading recorded by the scheduled Bank of Canada check.
+ * @summary Latest Canadian prime rate
+ */
+export const GetPrimeRateResponse = zod.object({
+  observedDate: zod
+    .string()
+    .describe("Calendar date of the Bank of Canada observation (YYYY-MM-DD)"),
+  primeRatePct: zod.number().describe("Live prime rate in percent"),
+  source: zod.string().describe("Data source label"),
+  lastCheckedAt: zod.coerce
+    .date()
+    .describe("When the scheduled check last recorded this reading"),
+});

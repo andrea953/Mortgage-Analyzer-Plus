@@ -1,2 +1,4 @@
 - [Mortgage calc form guards](mortgage-calc-rhf-guards.md) — adding a numeric field to scenario-form needs a guard line + setValueAs(0) or clearing it freezes the whole form.
 - [Mortgage calc brand theming](mortgage-calc-theming.md) — brand colors live in index.css tokens (--primary/--ring/--accent/--chart-*); edit BOTH light+dark blocks; keep contrast floors.
+- [Prime-rate monitor](prime-rate-monitor.md) — scheduled job→DB→api→banner; banner compares live vs CODE default and self-clears on redeploy; pure progressive enhancement.
+- [Generated query hooks](api-zod-query-hooks.md) — orval useGet* hooks need queryKey when passing query options (UseQueryOptions is not Partial); use getGet*QueryKey().

@@ -12,6 +12,7 @@ import { AmortizationSchedule } from "@/components/amortization-schedule";
 import { buildSchedule, summarize, PaymentFrequency, LumpSumType, Compounding } from "@/lib/mortgage";
 import { ScenarioComparison } from "@/components/scenario-comparison";
 import { PrintSummary } from "@/components/print-summary";
+import { PrimeRateBanner } from "@/components/PrimeRateBanner";
 import modernCentsLogo from "@assets/Big_logo_1777908930945.png";
 import {
   RenewalPlanner,
@@ -88,6 +89,8 @@ function ScenarioTitleInput({
   );
 }
 
+export const DEFAULT_PRIME_RATE_PCT = 5.45;
+
 const defaultScenario: ScenarioState = {
   title: "Scenario A",
   mode: "new",
@@ -95,7 +98,7 @@ const defaultScenario: ScenarioState = {
   principal: 500000,
   annualRatePct: 5.25,
   rateType: "fixed",
-  primeRatePct: 5.45,
+  primeRatePct: DEFAULT_PRIME_RATE_PCT,
   spreadPct: 0,
   amortizationYears: 25,
   amortizationMonths: 0,
@@ -323,6 +326,9 @@ export default function Calculator() {
       />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8 print:hidden">
+        <div className="mb-4 sm:mb-6">
+          <PrimeRateBanner appPrimeRatePct={DEFAULT_PRIME_RATE_PCT} />
+        </div>
         <Tabs value={tab} onValueChange={(v) => setTab(v as "calculator" | "renewal")}>
           <TabsList className="mb-4 sm:mb-6 w-full sm:w-auto">
             <TabsTrigger value="calculator" className="gap-2">

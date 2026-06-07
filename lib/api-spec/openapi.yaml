@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: prime-rate
+    description: Canadian prime rate monitoring
 paths:
   /healthz:
     get:
@@ -24,6 +26,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /prime-rate:
+    get:
+      operationId: getPrimeRate
+      tags: [prime-rate]
+      summary: Latest Canadian prime rate
+      description: >-
+        Returns the most recent Canadian prime rate reading recorded by the
+        scheduled Bank of Canada check.
+      responses:
+        "200":
+          description: Latest prime rate reading
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrimeRateStatus"
+        "404":
+          description: No prime rate reading available yet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorMessage"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +56,32 @@ components:
           type: string
       required:
         - status
+    PrimeRateStatus:
+      type: object
+      properties:
+        observedDate:
+          type: string
+          description: Calendar date of the Bank of Canada observation (YYYY-MM-DD)
+        primeRatePct:
+          type: number
+          description: Live prime rate in percent
+        source:
+          type: string
+          description: Data source label
+        lastCheckedAt:
+          type: string
+          format: date-time
+          description: When the scheduled check last recorded this reading
+      required:
+        - observedDate
+        - primeRatePct
+        - source
+        - lastCheckedAt
+    ApiErrorMessage:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
 

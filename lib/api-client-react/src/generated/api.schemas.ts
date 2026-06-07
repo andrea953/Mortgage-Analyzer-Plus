@@ -8,3 +8,18 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface PrimeRateStatus {
+  /** Calendar date of the Bank of Canada observation (YYYY-MM-DD) */
+  observedDate: string;
+  /** Live prime rate in percent */
+  primeRatePct: number;
+  /** Data source label */
+  source: string;
+  /** When the scheduled check last recorded this reading */
+  lastCheckedAt: string;
+}
+
+export interface ApiErrorMessage {
+  error: string;
+}
