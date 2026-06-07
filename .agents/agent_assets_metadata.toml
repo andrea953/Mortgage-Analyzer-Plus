@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "4ZCEAPCgOr4mPnjE9OqGf"
+uri = "file://artifacts/mortgage-calculator/docs/RUNBOOK-prime-rate.md"
+type = "text"
+title = "Prime Rate Update Runbook"
