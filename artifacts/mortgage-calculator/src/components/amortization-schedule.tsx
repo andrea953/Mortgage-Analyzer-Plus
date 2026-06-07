@@ -82,10 +82,10 @@ export function AmortizationSchedule({ schedule }: AmortizationScheduleProps) {
             <Table>
               <TableHeader className="sticky top-0 bg-card z-10 shadow-sm">
                 <TableRow>
-                  <TableHead className="w-[100px]">Payment</TableHead>
+                  <TableHead className="w-[70px] sm:w-[100px]">Payment</TableHead>
                   <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Beginning</TableHead>
-                  <TableHead className="text-right">Total Pmt</TableHead>
+                  <TableHead className="text-right hidden sm:table-cell">Beginning</TableHead>
+                  <TableHead className="text-right hidden sm:table-cell">Total Pmt</TableHead>
                   <TableHead className="text-right">Interest</TableHead>
                   <TableHead className="text-right">Principal</TableHead>
                   <TableHead className="text-right">Balance</TableHead>
@@ -118,8 +118,8 @@ export function AmortizationSchedule({ schedule }: AmortizationScheduleProps) {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-right text-muted-foreground text-sm">--</TableCell>
-                        <TableCell className="text-right text-muted-foreground text-sm">--</TableCell>
+                        <TableCell className="text-right text-muted-foreground text-sm hidden sm:table-cell">--</TableCell>
+                        <TableCell className="text-right text-muted-foreground text-sm hidden sm:table-cell">--</TableCell>
                         <TableCell className="text-right font-medium text-destructive">{formatCurrency(totalInterest)}</TableCell>
                         <TableCell className="text-right font-medium text-primary">{formatCurrency(totalPrincipal)}</TableCell>
                         <TableCell className="text-right font-semibold">{formatCurrency(endBalance)}</TableCell>
@@ -139,8 +139,8 @@ export function AmortizationSchedule({ schedule }: AmortizationScheduleProps) {
                             </div>
                           </TableCell>
                           <TableCell>{row.date.toLocaleDateString()}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(row.beginningBalance)}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(row.payment)}</TableCell>
+                          <TableCell className="text-right hidden sm:table-cell">{formatCurrency(row.beginningBalance)}</TableCell>
+                          <TableCell className="text-right hidden sm:table-cell">{formatCurrency(row.payment)}</TableCell>
                           <TableCell className="text-right text-destructive">{formatCurrency(row.interest)}</TableCell>
                           <TableCell className="text-right text-primary">{formatCurrency(row.principal + row.extra + row.lumpSum)}</TableCell>
                           <TableCell className="text-right">{formatCurrency(row.endingBalance)}</TableCell>

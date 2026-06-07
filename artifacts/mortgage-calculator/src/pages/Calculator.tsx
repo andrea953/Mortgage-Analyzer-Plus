@@ -355,7 +355,7 @@ export default function Calculator() {
       />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8 print:hidden">
-        <section className="mb-4 sm:mb-6 rounded-2xl border border-border/60 bg-card/40 p-5 sm:p-6">
+        <section className="mb-4 sm:mb-6 rounded-2xl border border-border/60 bg-card/40 p-4 sm:p-6">
           <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-foreground">
             Model your Canadian mortgage with confidence
           </h2>

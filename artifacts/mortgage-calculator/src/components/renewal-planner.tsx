@@ -280,10 +280,10 @@ export function RenewalPlanner({
                   onClick={() => remove(idx)}
                   variant="ghost"
                   size="icon"
-                  className="absolute top-2 right-2 h-7 w-7"
+                  className="absolute top-2 right-2 h-9 w-9"
                   aria-label="Remove option"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X className="h-4 w-4" />
                 </Button>
               )}
               <Input

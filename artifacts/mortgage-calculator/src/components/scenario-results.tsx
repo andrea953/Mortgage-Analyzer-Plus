@@ -45,7 +45,7 @@ export function ScenarioResults({ summary, scenario }: ScenarioResultsProps) {
               <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/><path d="M9 21v-6h6v6"/></svg>
             </div>
             <h3 className="text-white/90 font-medium text-sm mb-2">Total Monthly Housing Cost</h3>
-            <div className="text-4xl font-bold tracking-tight">
+            <div className="text-3xl sm:text-4xl font-bold tracking-tight">
               <AnimatedNumber value={totalMonthlyHousing} format={formatCurrency} />
             </div>
             <div className="space-y-1.5 text-sm mt-4 pt-4 border-t border-white/20">

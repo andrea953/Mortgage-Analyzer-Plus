@@ -140,18 +140,18 @@ export function AmortizationChart({ scheduleA, scenarioA, scheduleB, scenarioB, 
       <CardHeader className="pb-2">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <CardTitle className="text-lg">Visualizations</CardTitle>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
-              <TabsTrigger value="balance">Balance</TabsTrigger>
-              <TabsTrigger value="cumulative">Cumulative</TabsTrigger>
-              <TabsTrigger value="breakdown">Breakdown</TabsTrigger>
-              <TabsTrigger value="housing">Housing</TabsTrigger>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
+            <TabsList className="flex w-full flex-wrap h-auto sm:w-auto">
+              <TabsTrigger value="balance" className="flex-1 sm:flex-none">Balance</TabsTrigger>
+              <TabsTrigger value="cumulative" className="flex-1 sm:flex-none">Cumulative</TabsTrigger>
+              <TabsTrigger value="breakdown" className="flex-1 sm:flex-none">Breakdown</TabsTrigger>
+              <TabsTrigger value="housing" className="flex-1 sm:flex-none">Housing</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="h-[350px] w-full mt-4">
+        <div className="h-[280px] sm:h-[350px] w-full mt-4">
           {activeTab === "balance" && (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={yearlyData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
