@@ -57,6 +57,7 @@ export function computePayment({
   compounding?: Compounding;
 }): number {
   if (principal <= 0) return 0;
+  if (amortizationMonths <= 0) return 0;
   if (annualRatePct === 0) {
     const totalPeriods = (amortizationMonths / 12) * frequencyPeriods[frequency];
     return principal / totalPeriods;
@@ -107,6 +108,7 @@ export function recurringMonthlyMortgage({
   extraPerPeriod: number;
   compounding?: Compounding;
 }): number {
+  if (principal <= 0 || amortizationMonths <= 0) return 0;
   const pay = computePayment({ principal, annualRatePct, amortizationMonths, frequency, compounding });
   return ((pay + (extraPerPeriod || 0)) * frequencyPeriods[frequency]) / 12;
 }
@@ -160,6 +162,7 @@ export function buildSchedule({
   compounding?: Compounding;
 }): ScheduleRow[] {
   const schedule: ScheduleRow[] = [];
+  if (principal <= 0 || amortizationMonths <= 0) return schedule;
   const rate = getPerPeriodRate(annualRatePct, frequency, compounding);
   const regularPayment = computePayment({ principal, annualRatePct, amortizationMonths, frequency, compounding });
 
