@@ -29,6 +29,7 @@ export type PrintRenewalOption = {
 };
 
 type Props = {
+  clientName?: string;
   scenarioA: ScenarioState;
   summaryA: Summary;
   scheduleA: ScheduleRow[];
@@ -272,6 +273,7 @@ function ScenarioBlock({
 }
 
 export function PrintSummary({
+  clientName,
   scenarioA,
   summaryA,
   scheduleA,
@@ -324,6 +326,12 @@ export function PrintSummary({
           </div>
         </div>
         <div className="ps-header-right">
+          {clientName?.trim() && (
+            <>
+              <div className="ps-meta-label">Prepared for</div>
+              <div className="ps-meta-value">{clientName.trim()}</div>
+            </>
+          )}
           <div className="ps-meta-label">Prepared</div>
           <div className="ps-meta-value">{fmtDateLong(generated)}</div>
         </div>

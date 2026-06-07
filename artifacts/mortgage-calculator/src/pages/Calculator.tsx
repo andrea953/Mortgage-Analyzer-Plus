@@ -122,6 +122,7 @@ export default function Calculator() {
   const { theme, setTheme } = useTheme();
   const [tab, setTab] = useState<"calculator" | "renewal">("calculator");
   const [isCompare, setIsCompare] = useState(false);
+  const [clientName, setClientName] = useState("");
   const [scenarioA, setScenarioA] = useState<ScenarioState>({ ...defaultScenario });
   const [scenarioB, setScenarioB] = useState<ScenarioState>({ 
     ...defaultScenario, 
@@ -299,6 +300,7 @@ export default function Calculator() {
       </header>
 
       <PrintSummary
+        clientName={clientName}
         scenarioA={scenarioA}
         summaryA={summaryA}
         scheduleA={scheduleA}
@@ -328,6 +330,19 @@ export default function Calculator() {
       <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8 print:hidden">
         <div className="mb-4 sm:mb-6">
           <PrimeRateBanner appPrimeRatePct={DEFAULT_PRIME_RATE_PCT} />
+        </div>
+        <div className="mb-4 sm:mb-6 flex items-center gap-2 max-w-md">
+          <label htmlFor="client-name" className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+            Prepared for
+          </label>
+          <Input
+            id="client-name"
+            value={clientName}
+            onChange={(e) => setClientName(e.target.value)}
+            placeholder="Client name (appears on PDF)"
+            maxLength={60}
+            data-testid="input-client-name"
+          />
         </div>
         <Tabs value={tab} onValueChange={(v) => setTab(v as "calculator" | "renewal")}>
           <TabsList className="mb-4 sm:mb-6 w-full sm:w-auto">
