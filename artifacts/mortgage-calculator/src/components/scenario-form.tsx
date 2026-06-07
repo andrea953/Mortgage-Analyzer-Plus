@@ -207,6 +207,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                 id="principal"
                 type="number"
                 className="pl-7 text-right"
+                onFocus={(e) => e.currentTarget.select()}
                 {...register("principal", { valueAsNumber: true })}
               />
             </div>
@@ -258,6 +259,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                     type="number"
                     step="0.01"
                     className="pr-7 text-right"
+                    onFocus={(e) => e.currentTarget.select()}
                     {...register("annualRatePct", { valueAsNumber: true })}
                   />
                   <span className="absolute right-3 top-1.5 text-muted-foreground">%</span>
@@ -288,6 +290,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                     step="0.05"
                     min={0}
                     className="pr-7 text-right"
+                    onFocus={(e) => e.currentTarget.select()}
                     {...register("primeRatePct", { valueAsNumber: true })}
                   />
                   <span className="absolute right-3 top-1.5 text-muted-foreground">%</span>
@@ -307,6 +310,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                     type="number"
                     step="0.05"
                     className="pr-7 text-right"
+                    onFocus={(e) => e.currentTarget.select()}
                     {...register("spreadPct", { valueAsNumber: true })}
                   />
                   <span className="absolute right-3 top-1.5 text-muted-foreground">%</span>
@@ -371,6 +375,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                 <Input
                   type="number"
                   className="w-16 text-right"
+                  onFocus={(e) => e.currentTarget.select()}
                   {...register("amortizationYears", { valueAsNumber: true })}
                 />
                 <span className="text-sm text-muted-foreground">yrs</span>
@@ -379,6 +384,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                 <Input
                   type="number"
                   className="w-16 text-right"
+                  onFocus={(e) => e.currentTarget.select()}
                   {...register("amortizationMonths", { valueAsNumber: true })}
                 />
                 <span className="text-sm text-muted-foreground">mos</span>
@@ -477,6 +483,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                 id="termYears"
                 type="number"
                 className="w-16 text-right"
+                onFocus={(e) => e.currentTarget.select()}
                 {...register("termYears", { valueAsNumber: true })}
               />
               <span className="text-sm text-muted-foreground">yrs</span>
@@ -522,6 +529,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                 id="extraPerPeriod"
                 type="number"
                 className="pl-7 text-right"
+                onFocus={(e) => e.currentTarget.select()}
                 {...register("extraPerPeriod", { valueAsNumber: true })}
               />
             </div>
@@ -572,6 +580,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                   step={values.lumpSumType === "percent" ? "0.1" : "100"}
                   min={0}
                   className={values.lumpSumType === "amount" ? "pl-7 text-right" : "pr-7 text-right"}
+                  onFocus={(e) => e.currentTarget.select()}
                   {...register("lumpSumValue", { valueAsNumber: true })}
                 />
               </div>
@@ -593,6 +602,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                   max={values.amortizationYears || 30}
                   step={1}
                   className="text-right h-9"
+                  onFocus={(e) => e.currentTarget.select()}
                   {...register("lumpSumStartYear", { valueAsNumber: true })}
                 />
               </div>
@@ -605,6 +615,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                   max={values.amortizationYears || 30}
                   step={1}
                   className="text-right h-9"
+                  onFocus={(e) => e.currentTarget.select()}
                   {...register("lumpSumEndYear", { valueAsNumber: true })}
                 />
               </div>

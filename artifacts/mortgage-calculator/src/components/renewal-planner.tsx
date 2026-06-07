@@ -318,6 +318,7 @@ export function RenewalPlanner({
                     type="number"
                     step="0.05"
                     value={c.opt.rate}
+                    onFocus={(e) => e.currentTarget.select()}
                     onChange={(e) => update(idx, { rate: parseFloat(e.target.value) || 0 })}
                     className="h-9"
                   />
@@ -330,6 +331,7 @@ export function RenewalPlanner({
                     max={10}
                     step={1}
                     value={c.opt.termYears}
+                    onFocus={(e) => e.currentTarget.select()}
                     onChange={(e) => update(idx, { termYears: Math.max(1, parseInt(e.target.value) || 1) })}
                     className="h-9"
                   />
@@ -361,6 +363,7 @@ export function RenewalPlanner({
                     type="number"
                     min={0}
                     value={c.opt.extraPerPeriod}
+                    onFocus={(e) => e.currentTarget.select()}
                     onChange={(e) => update(idx, { extraPerPeriod: Math.max(0, parseFloat(e.target.value) || 0) })}
                     className="h-9 pl-7 text-right"
                   />
