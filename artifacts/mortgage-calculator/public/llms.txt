@@ -1,0 +1,33 @@
+# Modern Cents — Canadian Mortgage Calculator
+
+> A free, browser-based Canadian mortgage calculator with semi-annual compounding, multiple payment frequencies, extra payments, lump sums, variable-rate modeling, scenario comparison, and renewal planning.
+
+## Purpose
+
+Modern Cents helps Canadian homeowners and buyers plan, model, and compare mortgages. It applies semi-annual compounding as required by Canada's Interest Act for fixed-rate mortgages, and lets users experiment with prepayment strategies, renewal options, and side-by-side scenario comparisons — all in real time, with no sign-up required.
+
+## Primary page
+
+- `/` — The mortgage calculator. Enter loan amount, rate, amortization period, term length, and payment frequency to see a full payment breakdown, amortization chart, and period-by-period schedule.
+
+## Key capabilities
+
+- **Semi-annual compounding** for fixed-rate mortgages (Canadian legal standard)
+- **Payment frequencies**: monthly, bi-weekly, weekly, accelerated bi-weekly, accelerated weekly
+- **Extra payments**: fixed amount per period, applied throughout the amortization or a chosen date range
+- **Annual lump sums**: fixed dollar amount or percentage of remaining principal
+- **Variable-rate modeling**: prime rate + spread input with automatic effective-rate calculation
+- **Scenario comparison**: run two independent mortgage scenarios side-by-side
+- **Renewal planner**: model multiple renewal options from your term-end balance
+- **Full amortization schedule**: period-by-period table of payment, interest, principal, and balance
+- **Print summary**: formatted one-page summary for letter-size paper
+
+## Intended audience
+
+Canadian homebuyers, homeowners approaching renewal, mortgage brokers, and financial planners who need accurate Canadian mortgage math in a fast, no-login tool.
+
+## Policies
+
+- Free to use, no account required
+- For informational purposes only — not financial advice
+- No data is stored or transmitted; all calculations run locally in the browser

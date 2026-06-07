@@ -70,7 +70,45 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div style="font-family:Inter,system-ui,sans-serif;max-width:860px;margin:0 auto;padding:32px 20px;color:#111">
+        <header style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+          <img src="/modern-cents-logo.png" alt="Modern Cents logo" width="48" height="48" style="border-radius:12px" />
+          <div>
+            <h1 style="margin:0;font-size:1.5rem;font-weight:700;line-height:1.2">Modern Cents — Canadian Mortgage Calculator</h1>
+            <p style="margin:4px 0 0;font-size:0.9rem;color:#555">Polished scenario modeling with semi-annual interest, lump sums, and renewal projections</p>
+          </div>
+        </header>
+        <p style="font-size:1rem;line-height:1.6;margin:0 0 20px">
+          Modern Cents is a free Canadian mortgage calculator that models the full cost of your mortgage using
+          <strong>semi-annual compounding</strong> — the standard required by Canadian law for fixed-rate mortgages.
+          Enter your loan details and instantly see your payment breakdown, total interest paid, and remaining
+          balance at the end of your term.
+        </p>
+        <h2 style="font-size:1.1rem;font-weight:600;margin:0 0 12px">Key features</h2>
+        <ul style="margin:0 0 20px;padding-left:24px;line-height:1.8;font-size:0.95rem">
+          <li><strong>Semi-annual compounding</strong> — matches Canada's Interest Act for fixed-rate mortgages</li>
+          <li><strong>Multiple payment frequencies</strong> — monthly, bi-weekly, weekly, accelerated bi-weekly, and accelerated weekly</li>
+          <li><strong>Extra payments &amp; lump sums</strong> — model prepayments as a fixed dollar amount or percentage of principal, applied once or every year</li>
+          <li><strong>Variable-rate support</strong> — enter a prime rate and spread; the effective rate updates automatically</li>
+          <li><strong>Scenario comparison</strong> — run two scenarios side-by-side to compare rates, frequencies, or prepayment strategies</li>
+          <li><strong>Renewal planner</strong> — project multiple renewal options from your term-end balance and compare their total cost</li>
+          <li><strong>Full amortization schedule</strong> — period-by-period table showing payment, interest, principal, and outstanding balance</li>
+          <li><strong>Print-ready summary</strong> — one-click formatted summary designed for letter-size paper</li>
+        </ul>
+        <h2 style="font-size:1.1rem;font-weight:600;margin:0 0 12px">How Canadian mortgage interest works</h2>
+        <p style="font-size:0.95rem;line-height:1.6;margin:0 0 20px">
+          Canadian fixed-rate mortgages must compound semi-annually under the <em>Interest Act</em>, not monthly
+          as is common in other countries. This means the stated annual rate is first converted to a semi-annual
+          effective rate, then to an equivalent rate matching your chosen payment frequency. Modern Cents applies
+          this conversion automatically so your results reflect the true cost of borrowing.
+        </p>
+        <p style="font-size:0.85rem;color:#777;margin:0">
+          For informational purposes only. Not financial advice. Calculations are based on standard Canadian
+          mortgage conventions.
+        </p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
