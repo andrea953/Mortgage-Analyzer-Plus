@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TrendingUp, X } from "lucide-react";
+import { CheckCircle2, X } from "lucide-react";
 import {
   useGetPrimeRate,
   getGetPrimeRateQueryKey,
@@ -35,10 +35,8 @@ export function PrimeRateBanner({ appPrimeRatePct }: PrimeRateBannerProps) {
   const livePrimeRatePct = data.primeRatePct;
   const drift = Math.abs(livePrimeRatePct - appPrimeRatePct);
 
-  // No meaningful change, or the user dismissed this session.
+  // Live rate matches the build-time default (nothing to announce), or dismissed.
   if (drift < 0.01 || dismissed) return null;
-
-  const direction = livePrimeRatePct > appPrimeRatePct ? "risen" : "fallen";
 
   return (
     <div
@@ -47,23 +45,19 @@ export function PrimeRateBanner({ appPrimeRatePct }: PrimeRateBannerProps) {
     >
       <div className="flex items-start gap-3 pr-8">
         <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--primary)/0.18)] text-[hsl(var(--primary))]">
-          <TrendingUp className="h-5 w-5" />
+          <CheckCircle2 className="h-5 w-5" />
         </span>
         <div className="min-w-0 space-y-1">
           <p className="text-sm font-semibold text-foreground">
-            Prime rate update available
+            Prime rate updated automatically
           </p>
           <p className="text-sm text-muted-foreground">
-            The Canadian prime rate has {direction} to{" "}
+            This calculator is using the latest Canadian prime rate of{" "}
             <span className="font-semibold text-foreground">
               {livePrimeRatePct.toFixed(2)}%
             </span>{" "}
             (Bank of Canada, observed {formatObservedDate(data.observedDate)}).
-            This calculator currently defaults to{" "}
-            <span className="font-semibold text-foreground">
-              {appPrimeRatePct.toFixed(2)}%
-            </span>
-            , so variable-rate results may be off until the default is updated.
+            Variable-rate scenarios are calculated with this rate automatically.
           </p>
         </div>
       </div>

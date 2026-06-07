@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
+import { useGetPrimeRate, getGetPrimeRateQueryKey } from "@workspace/api-client-react";
 import { Moon, Sun, Printer, Calculator as CalculatorIcon, RefreshCw, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -131,6 +132,43 @@ export default function Calculator() {
     frequency: "Accelerated bi-weekly"
   });
   const [renewalOptions, setRenewalOptions] = useState<RenewalOption[]>(defaultRenewalOptions);
+
+  // Auto-update the prime-rate default from the live Bank of Canada reading.
+  const { data: livePrimeData } = useGetPrimeRate({
+    query: {
+      queryKey: getGetPrimeRateQueryKey(),
+      retry: false,
+      staleTime: 1000 * 60 * 60,
+    },
+  });
+  const livePrimeRatePct = livePrimeData?.primeRatePct;
+  const [primeSeeded, setPrimeSeeded] = useState(false);
+  const primeAppliedRef = useRef(false);
+
+  useEffect(() => {
+    if (livePrimeRatePct == null || primeAppliedRef.current) return;
+    primeAppliedRef.current = true;
+
+    // Nothing to apply if the live rate already matches the build-time default;
+    // skip the state update and form remount entirely.
+    if (Math.abs(livePrimeRatePct - DEFAULT_PRIME_RATE_PCT) < 0.001) return;
+
+    // Only override scenarios still on the build-time default prime (untouched).
+    const applyLivePrime = (s: ScenarioState): ScenarioState => {
+      if (Math.abs(s.primeRatePct - DEFAULT_PRIME_RATE_PCT) > 0.001) return s;
+      if (s.rateType === "variable") {
+        const annualRatePct =
+          Math.round(Math.max(0, livePrimeRatePct + s.spreadPct) * 100) / 100;
+        return { ...s, primeRatePct: livePrimeRatePct, annualRatePct };
+      }
+      return { ...s, primeRatePct: livePrimeRatePct };
+    };
+
+    setScenarioA((prev) => applyLivePrime(prev));
+    setScenarioB((prev) => applyLivePrime(prev));
+    // Remount the forms so their RHF defaultValues pick up the seeded prime.
+    setPrimeSeeded(true);
+  }, [livePrimeRatePct]);
 
   const parseStart = (iso: string) => {
     if (!iso) return new Date();
@@ -368,7 +406,7 @@ export default function Calculator() {
                     accentClass="bg-[hsl(var(--chart-1))]"
                   />
                 )}
-                <ScenarioForm state={scenarioA} onChange={setScenarioA} />
+                <ScenarioForm key={`A-${primeSeeded}`} state={scenarioA} onChange={setScenarioA} />
               </div>
 
               {isCompare ? (
@@ -379,7 +417,7 @@ export default function Calculator() {
                     placeholder="Scenario B"
                     accentClass="bg-[hsl(var(--chart-3))]"
                   />
-                  <ScenarioForm state={scenarioB} onChange={setScenarioB} />
+                  <ScenarioForm key={`B-${primeSeeded}`} state={scenarioB} onChange={setScenarioB} />
                 </div>
               ) : (
                 <div className="lg:col-span-8 space-y-6 sm:space-y-8">
