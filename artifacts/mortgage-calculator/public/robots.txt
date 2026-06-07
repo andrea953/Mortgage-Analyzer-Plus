@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://832df1b5-eb85-404c-b98d-892fc0c51b6e-00-2d36gb28yd1fa-t47mi5ph.spock.replit.dev/sitemap.xml
