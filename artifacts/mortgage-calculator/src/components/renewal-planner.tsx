@@ -207,6 +207,24 @@ export function RenewalPlanner({
 
   return (
     <div className="space-y-6">
+      {/* How this works */}
+      <div className="flex gap-3 rounded-md border border-border bg-muted/40 p-4">
+        <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+        <div className="text-sm text-muted-foreground space-y-1">
+          <p className="font-medium text-foreground">Set up your mortgage in the Calculator tab first</p>
+          <p>
+            The Renewal Planner builds on your Calculator inputs (Scenario A when comparing). These
+            three figures carry over automatically and anchor every option below:
+          </p>
+          <ul className="list-disc pl-5 space-y-0.5">
+            <li><strong className="text-foreground">Projected balance at renewal</strong> — what you'll still owe at the end of your current term (driven by your loan amount, rate, payments, and prepayments)</li>
+            <li><strong className="text-foreground">Renewal date</strong> — your term start date plus the term length</li>
+            <li><strong className="text-foreground">Remaining amortization</strong> — years left to pay off after renewal (your amortization minus the term)</li>
+          </ul>
+          <p>To change these, adjust the matching inputs in the Calculator: loan amount, rate, payments, and prepayments shift the projected balance; term start date and term length set the renewal date; amortization and term set the remaining amortization.</p>
+        </div>
+      </div>
+
       {/* Snapshot banner */}
       <Card className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-950/30 dark:via-purple-950/30 dark:to-pink-950/30 border-purple-200/60 dark:border-purple-800/40">
         <CardContent className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
