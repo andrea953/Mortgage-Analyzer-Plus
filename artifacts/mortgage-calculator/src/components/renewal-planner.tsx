@@ -60,6 +60,7 @@ export type ComputedRenewal = {
   color: string;
   totalCostInTerm: number;
   periodsInTerm: number;
+  remainingAmortMonthsAtTermEnd: number;
 };
 
 export function computeRenewals(
@@ -82,6 +83,11 @@ export function computeRenewals(
     const summary = summarize(schedule, opt.termYears, renewalDate);
     const periodsInTerm = opt.termYears * frequencyPeriods[opt.frequency];
     const totalCostInTerm = summary.totalPayment * periodsInTerm;
+    const rowsRemainingAfterTerm = schedule.filter((r) => r.date > summary.renewalDate).length;
+    const remainingAmortMonthsAtTermEnd =
+      rowsRemainingAfterTerm === 0
+        ? 0
+        : Math.max(1, Math.round((rowsRemainingAfterTerm / frequencyPeriods[opt.frequency]) * 12));
     return {
       opt,
       schedule,
@@ -89,6 +95,7 @@ export function computeRenewals(
       color: COLORS[i % COLORS.length],
       totalCostInTerm,
       periodsInTerm,
+      remainingAmortMonthsAtTermEnd,
     };
   });
 }
@@ -390,6 +397,14 @@ export function RenewalPlanner({
                 <div className="flex justify-between gap-2">
                   <span className="text-muted-foreground">Term ends</span>
                   <span className="font-semibold">{fmtMonthYear(c.summary.renewalDate)}</span>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground">Amortization left</span>
+                  <span className="font-semibold tabular-nums" data-testid={`text-remaining-amort-${idx}`}>
+                    {c.remainingAmortMonthsAtTermEnd <= 0
+                      ? "Paid off"
+                      : `${Math.floor(c.remainingAmortMonthsAtTermEnd / 12)} yrs ${c.remainingAmortMonthsAtTermEnd % 12} mos`}
+                  </span>
                 </div>
               </div>
 
