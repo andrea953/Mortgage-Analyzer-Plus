@@ -382,6 +382,14 @@ export function RenewalPlanner({
                   <span className="text-muted-foreground">Payment / period</span>
                   <span className="font-semibold tabular-nums">{formatCurrency(c.summary.totalPayment)}</span>
                 </div>
+                {c.opt.frequency !== "Monthly" && (
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">Monthly equivalent</span>
+                    <span className="font-semibold tabular-nums" data-testid={`text-monthly-equivalent-${idx}`}>
+                      {formatCurrency((c.summary.totalPayment * frequencyPeriods[c.opt.frequency]) / 12)}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between gap-2">
                   <span className="text-muted-foreground">Interest over term</span>
                   <span className="font-semibold tabular-nums">{formatCurrency(c.summary.termInterest)}</span>
