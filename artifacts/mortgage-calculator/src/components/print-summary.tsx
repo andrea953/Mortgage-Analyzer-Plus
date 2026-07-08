@@ -26,6 +26,9 @@ export type PrintRenewalOption = {
   totalCostInTerm: number;
   termEndingBalance: number;
   termEndDate: Date;
+  /** Amortization used for this option (months); flagged when re-amortized vs carried-over */
+  amortizationMonths: number;
+  isReAmortized: boolean;
 };
 
 type Props = {
@@ -414,6 +417,7 @@ export function PrintSummary({
                 <th className="ps-num">Rate</th>
                 <th className="ps-num">Term</th>
                 <th>Frequency</th>
+                <th className="ps-num">Amortization</th>
                 <th className="ps-num">Payment</th>
                 <th className="ps-num">Term Interest</th>
                 <th className="ps-num">Balance at End</th>
@@ -438,6 +442,11 @@ export function PrintSummary({
                     <td className="ps-num">{o.rate.toFixed(2)}%</td>
                     <td className="ps-num">{o.termYears} yr</td>
                     <td>{o.frequency}</td>
+                    <td className="ps-num">
+                      {Math.floor(o.amortizationMonths / 12)}y
+                      {o.amortizationMonths % 12 > 0 ? ` ${o.amortizationMonths % 12}m` : ""}
+                      {o.isReAmortized ? "*" : ""}
+                    </td>
                     <td className="ps-num">{formatCurrency(o.payment)}</td>
                     <td className="ps-num">{formatCurrency(o.termInterest)}</td>
                     <td className="ps-num">{formatCurrency(o.termEndingBalance)}</td>
@@ -447,6 +456,14 @@ export function PrintSummary({
               })}
             </tbody>
           </table>
+
+          {renewalOptions!.some((o) => o.isReAmortized) && (
+            <div className="ps-renewal-tips">
+              * Re-amortized at renewal (differs from the carried-over remaining
+              amortization). Extending amortization typically requires a refinance with
+              requalification.
+            </div>
+          )}
 
           <div className="ps-renewal-tips">
             <strong>How to choose:</strong> shorter terms usually carry lower rates but

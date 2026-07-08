@@ -39,6 +39,8 @@ export type RenewalOption = {
   termYears: number;
   frequency: PaymentFrequency;
   extraPerPeriod: number;
+  /** Optional: re-amortize at renewal to this many months instead of the carried-over remaining amortization */
+  reAmortizeMonths?: number;
 };
 
 export const defaultRenewalOptions: RenewalOption[] = [
@@ -73,7 +75,7 @@ export function computeRenewals(
     const schedule = buildSchedule({
       principal: renewalBalance,
       annualRatePct: opt.rate,
-      amortizationMonths: Math.max(remainingAmortMonths, 1),
+      amortizationMonths: Math.max(opt.reAmortizeMonths ?? remainingAmortMonths, 1),
       frequency: opt.frequency,
       extraPerPeriod: opt.extraPerPeriod,
       lumpSumValue: 0,
@@ -82,7 +84,12 @@ export function computeRenewals(
     });
     const summary = summarize(schedule, opt.termYears, renewalDate);
     const periodsInTerm = opt.termYears * frequencyPeriods[opt.frequency];
-    const totalCostInTerm = summary.totalPayment * periodsInTerm;
+    // Sum actual scheduled payments up to term end (handles payoff before term end,
+    // e.g. when re-amortized shorter than the term)
+    // Note: r.payment already includes extra + lumpSum (see buildSchedule)
+    const totalCostInTerm = schedule
+      .filter((r) => r.date <= summary.renewalDate)
+      .reduce((sum, r) => sum + r.payment, 0);
     const rowsRemainingAfterTerm = schedule.filter((r) => r.date > summary.renewalDate).length;
     const remainingAmortMonthsAtTermEnd =
       rowsRemainingAfterTerm === 0
@@ -375,6 +382,76 @@ export function RenewalPlanner({
                     className="h-9 pl-7 text-right"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-1">
+                {c.opt.reAmortizeMonths == null ? (
+                  <button
+                    type="button"
+                    onClick={() => update(idx, { reAmortizeMonths: remainingAmortMonths })}
+                    className="text-xs text-primary underline-offset-2 hover:underline"
+                    data-testid={`button-reamortize-${idx}`}
+                  >
+                    Re-amortize to a new payoff timeline
+                  </button>
+                ) : (
+                  <div className="space-y-1.5 rounded-md border border-border bg-muted/30 p-2.5">
+                    <div className="flex justify-between items-center">
+                      <Label className="text-xs">Re-amortize to</Label>
+                      <button
+                        type="button"
+                        onClick={() => update(idx, { reAmortizeMonths: undefined })}
+                        className="text-[10px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                        data-testid={`button-reamortize-reset-${idx}`}
+                      >
+                        Reset to carried-over
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          min={0}
+                          max={40}
+                          value={Math.floor(c.opt.reAmortizeMonths / 12)}
+                          onFocus={(e) => e.currentTarget.select()}
+                          onChange={(e) => {
+                            const yrs = Math.max(0, Math.min(40, parseInt(e.target.value) || 0));
+                            const mos = c.opt.reAmortizeMonths! % 12;
+                            update(idx, { reAmortizeMonths: Math.max(1, yrs * 12 + mos) });
+                          }}
+                          className="h-9 pr-10 text-right"
+                          data-testid={`input-reamortize-years-${idx}`}
+                        />
+                        <span className="absolute right-3 top-2 text-xs text-muted-foreground">yrs</span>
+                      </div>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          min={0}
+                          max={11}
+                          value={c.opt.reAmortizeMonths % 12}
+                          onFocus={(e) => e.currentTarget.select()}
+                          onChange={(e) => {
+                            const mos = Math.max(0, Math.min(11, parseInt(e.target.value) || 0));
+                            const yrs = Math.floor(c.opt.reAmortizeMonths! / 12);
+                            update(idx, { reAmortizeMonths: Math.max(1, yrs * 12 + mos) });
+                          }}
+                          className="h-9 pr-10 text-right"
+                          data-testid={`input-reamortize-months-${idx}`}
+                        />
+                        <span className="absolute right-3 top-2 text-xs text-muted-foreground">mos</span>
+                      </div>
+                    </div>
+                    {c.opt.reAmortizeMonths > remainingAmortMonths && (
+                      <p className="text-[10px] text-muted-foreground leading-snug">
+                        Longer than the carried-over {Math.floor(remainingAmortMonths / 12)} yrs{" "}
+                        {remainingAmortMonths % 12} mos — lenders typically require a refinance (with
+                        requalification) to extend amortization at renewal.
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="pt-3 border-t space-y-1.5 text-sm">

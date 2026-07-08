@@ -351,6 +351,8 @@ export default function Calculator() {
           totalCostInTerm: c.totalCostInTerm,
           termEndingBalance: c.summary.termEndingBalance,
           termEndDate: c.summary.renewalDate,
+          amortizationMonths: Math.max(c.opt.reAmortizeMonths ?? remainingAmortMonths, 1),
+          isReAmortized: c.opt.reAmortizeMonths != null && c.opt.reAmortizeMonths !== remainingAmortMonths,
         }))}
       />
 
