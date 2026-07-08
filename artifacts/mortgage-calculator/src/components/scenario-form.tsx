@@ -36,7 +36,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
   const { watch, setValue, register } = form;
   const values = watch();
 
-  const [showAmortHelper, setShowAmortHelper] = useState(false);
+  const [amortInputMode, setAmortInputMode] = useState<"payment" | "amortization">("payment");
   const [helperPayment, setHelperPayment] = useState("");
   const [termInputMode, setTermInputMode] = useState<"years" | "endDate">("years");
   const [termEndDate, setTermEndDate] = useState("");
@@ -102,7 +102,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
 
   const helperPaymentNum = parseFloat(helperPayment);
   const derivedAmortMonths =
-    showAmortHelper && !isNaN(helperPaymentNum) && helperPaymentNum > 0
+    isCurrent && amortInputMode === "payment" && !isNaN(helperPaymentNum) && helperPaymentNum > 0
       ? estimateAmortizationMonthsFromPayment({
           balance: values.principal,
           annualRatePct: values.annualRatePct,
@@ -114,13 +114,17 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
   const derivedAmortYears = derivedAmortMonths != null ? Math.floor(derivedAmortMonths / 12) : 0;
   const derivedAmortRemMonths = derivedAmortMonths != null ? derivedAmortMonths % 12 : 0;
 
-  const applyDerivedAmortization = () => {
-    if (derivedAmortMonths == null) return;
-    setValue("amortizationYears", derivedAmortYears, { shouldDirty: true });
-    setValue("amortizationMonths", derivedAmortRemMonths, { shouldDirty: true });
-    setShowAmortHelper(false);
-    setHelperPayment("");
-  };
+  // Auto-apply derived amortization while in payment mode
+  useEffect(() => {
+    if (!isCurrent || amortInputMode !== "payment" || derivedAmortMonths == null) return;
+    if (values.amortizationYears !== derivedAmortYears) {
+      setValue("amortizationYears", derivedAmortYears, { shouldDirty: true });
+    }
+    if (values.amortizationMonths !== derivedAmortRemMonths) {
+      setValue("amortizationMonths", derivedAmortRemMonths, { shouldDirty: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCurrent, amortInputMode, derivedAmortMonths]);
 
   // Term end date mode: derive termYears from termStartDate -> termEndDate
   const termEndMonths = (() => {
@@ -160,6 +164,17 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
     }
     setTermInputMode(mode);
   };
+
+  // When Current balance is selected, default Term input to End date
+  // and amortization entry back to payment-based estimation
+  useEffect(() => {
+    if (!isCurrent) return;
+    if (termInputMode === "years") {
+      switchTermMode("endDate");
+    }
+    setAmortInputMode("payment");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.mode]);
 
   const handleRateTypeChange = (next: RateType) => {
     if (next === values.rateType) return;
@@ -409,109 +424,99 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
 
         {/* Amortization */}
         <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <Label>{isCurrent ? "Remaining Amortization" : "Amortization"}</Label>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  className="w-16 text-right"
-                  onFocus={(e) => e.currentTarget.select()}
-                  {...register("amortizationYears", { valueAsNumber: true })}
-                />
-                <span className="text-sm text-muted-foreground">yrs</span>
+          {isCurrent && amortInputMode === "payment" ? (
+            <>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3">
+                <div className="flex-1 min-w-0">
+                  <Label htmlFor="helperPayment">Current Regular Payment</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Principal + interest per {values.frequency.toLowerCase()} period (exclude taxes, fees, extra)
+                  </p>
+                </div>
+                <div className="relative w-full sm:w-32">
+                  <span className="absolute left-3 top-1.5 text-muted-foreground">$</span>
+                  <Input
+                    id="helperPayment"
+                    type="number"
+                    inputMode="decimal"
+                    className="pl-7 text-right"
+                    onFocus={(e) => e.currentTarget.select()}
+                    value={helperPayment}
+                    onChange={(e) => setHelperPayment(e.target.value)}
+                    data-testid="input-current-payment"
+                  />
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  className="w-16 text-right"
-                  onFocus={(e) => e.currentTarget.select()}
-                  {...register("amortizationMonths", { valueAsNumber: true })}
-                />
-                <span className="text-sm text-muted-foreground">mos</span>
-              </div>
-            </div>
-          </div>
-          <Slider
-            min={1}
-            max={40}
-            step={1}
-            value={[values.amortizationYears]}
-            onValueChange={([val]) => setValue("amortizationYears", val)}
-            className="py-2"
-          />
-          {isCurrent && (
-            <div className="pt-1">
-              {!showAmortHelper ? (
-                <button
-                  type="button"
-                  onClick={() => setShowAmortHelper(true)}
-                  className="text-xs text-primary underline-offset-2 hover:underline"
-                >
-                  Don't know your remaining amortization?
-                </button>
+              {helperPayment.trim() === "" ? (
+                <p className="text-xs text-muted-foreground">
+                  Enter your payment to estimate remaining amortization.
+                </p>
+              ) : derivedAmortMonths != null ? (
+                <p className="text-xs text-muted-foreground" data-testid="text-derived-amort">
+                  Remaining amortization:{" "}
+                  <span className="font-medium text-foreground">
+                    {derivedAmortYears} yr{derivedAmortYears === 1 ? "" : "s"}
+                    {derivedAmortRemMonths > 0 ? ` ${derivedAmortRemMonths} mo${derivedAmortRemMonths === 1 ? "" : "s"}` : ""}
+                  </span>
+                </p>
               ) : (
-                <div className="space-y-2 rounded-md border border-border bg-muted/30 p-3">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                    <div className="flex-1 min-w-0">
-                      <Label htmlFor="helperPayment" className="text-sm">Current regular payment</Label>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Your principal + interest payment per {values.frequency.toLowerCase()} period (exclude taxes, fees, extra)
-                      </p>
-                    </div>
-                    <div className="relative w-full sm:w-32">
-                      <span className="absolute left-3 top-1.5 text-muted-foreground">$</span>
-                      <Input
-                        id="helperPayment"
-                        type="number"
-                        inputMode="decimal"
-                        className="pl-7 text-right"
-                        value={helperPayment}
-                        onChange={(e) => setHelperPayment(e.target.value)}
-                      />
-                    </div>
+                <p className="text-xs text-destructive">
+                  That payment is too low to pay down this balance at the current rate. Check the amount.
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={() => setAmortInputMode("amortization")}
+                className="text-xs text-primary underline-offset-2 hover:underline"
+                data-testid="button-enter-amort-directly"
+              >
+                Know your remaining amortization? Enter it directly
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="flex justify-between items-center">
+                <Label>{isCurrent ? "Remaining Amortization" : "Amortization"}</Label>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      className="w-16 text-right"
+                      onFocus={(e) => e.currentTarget.select()}
+                      {...register("amortizationYears", { valueAsNumber: true })}
+                    />
+                    <span className="text-sm text-muted-foreground">yrs</span>
                   </div>
-                  {helperPayment.trim() !== "" && (
-                    derivedAmortMonths != null ? (
-                      <p className="text-xs text-muted-foreground">
-                        Estimated remaining amortization:{" "}
-                        <span className="font-medium text-foreground">
-                          {derivedAmortYears} yr{derivedAmortYears === 1 ? "" : "s"}
-                          {derivedAmortRemMonths > 0 ? ` ${derivedAmortRemMonths} mo${derivedAmortRemMonths === 1 ? "" : "s"}` : ""}
-                        </span>
-                      </p>
-                    ) : (
-                      <p className="text-xs text-destructive">
-                        That payment is too low to pay down this balance at the current rate. Check the amount.
-                      </p>
-                    )
-                  )}
-                  <div className="flex items-center gap-2 pt-1">
-                    <Button
-                      type="button"
-                      size="sm"
-                      className="h-8 text-xs"
-                      disabled={derivedAmortMonths == null}
-                      onClick={applyDerivedAmortization}
-                    >
-                      Use this estimate
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 text-xs"
-                      onClick={() => {
-                        setShowAmortHelper(false);
-                        setHelperPayment("");
-                      }}
-                    >
-                      Cancel
-                    </Button>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      className="w-16 text-right"
+                      onFocus={(e) => e.currentTarget.select()}
+                      {...register("amortizationMonths", { valueAsNumber: true })}
+                    />
+                    <span className="text-sm text-muted-foreground">mos</span>
                   </div>
                 </div>
+              </div>
+              <Slider
+                min={1}
+                max={40}
+                step={1}
+                value={[values.amortizationYears]}
+                onValueChange={([val]) => setValue("amortizationYears", val)}
+                className="py-2"
+              />
+              {isCurrent && (
+                <button
+                  type="button"
+                  onClick={() => setAmortInputMode("payment")}
+                  className="text-xs text-primary underline-offset-2 hover:underline"
+                  data-testid="button-estimate-from-payment"
+                >
+                  Don't know it? Estimate from your current payment
+                </button>
               )}
-            </div>
+            </>
           )}
         </div>
 
