@@ -7,7 +7,7 @@ import { Plus, X, TrendingDown, Banknote, Award, Info, ExternalLink } from "luci
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 import { ScenarioState } from "@/pages/Calculator";
 import { buildSchedule, summarize, PaymentFrequency, frequencyPeriods, ScheduleRow } from "@/lib/mortgage";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatTermYears } from "@/lib/format";
 import {
   Select,
   SelectContent,
@@ -238,7 +238,7 @@ export function RenewalPlanner({
           <div>
             <div className="text-xs uppercase tracking-wide text-muted-foreground">At Renewal</div>
             <div className="text-2xl font-bold mt-1 brand-text-gradient">{fmtFullMonthYear(renewalDate)}</div>
-            <div className="text-xs text-muted-foreground mt-1">End of {scenarioA.termYears}-year term</div>
+            <div className="text-xs text-muted-foreground mt-1">End of {formatTermYears(scenarioA.termYears)} term</div>
           </div>
           <div>
             <div className="text-xs uppercase tracking-wide text-muted-foreground">Projected Balance</div>

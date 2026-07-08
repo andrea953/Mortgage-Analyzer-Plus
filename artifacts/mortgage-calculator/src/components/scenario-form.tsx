@@ -38,6 +38,8 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
 
   const [showAmortHelper, setShowAmortHelper] = useState(false);
   const [helperPayment, setHelperPayment] = useState("");
+  const [termInputMode, setTermInputMode] = useState<"years" | "endDate">("years");
+  const [termEndDate, setTermEndDate] = useState("");
 
   useEffect(() => {
     const sub = form.watch((v) => {
@@ -118,6 +120,45 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
     setValue("amortizationMonths", derivedAmortRemMonths, { shouldDirty: true });
     setShowAmortHelper(false);
     setHelperPayment("");
+  };
+
+  // Term end date mode: derive termYears from termStartDate -> termEndDate
+  const termEndMonths = (() => {
+    if (termInputMode !== "endDate" || !termEndDate || !values.termStartDate) return null;
+    const s = new Date(values.termStartDate + "T00:00:00");
+    const e = new Date(termEndDate + "T00:00:00");
+    if (isNaN(s.getTime()) || isNaN(e.getTime())) return null;
+    let months = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
+    if (e.getDate() < s.getDate()) months -= 1;
+    return months;
+  })();
+
+  useEffect(() => {
+    if (termInputMode !== "endDate" || termEndMonths == null) return;
+    if (termEndMonths < 1 || termEndMonths > 120) return;
+    const nextTermYears = termEndMonths / 12;
+    if (Math.abs(nextTermYears - (values.termYears ?? 0)) > 1e-9) {
+      setValue("termYears", nextTermYears, { shouldDirty: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [termInputMode, termEndMonths]);
+
+  const switchTermMode = (mode: "years" | "endDate") => {
+    if (mode === termInputMode) return;
+    if (mode === "endDate") {
+      // Prefill end date from current term
+      const s = new Date(values.termStartDate + "T00:00:00");
+      if (!isNaN(s.getTime())) {
+        const e = new Date(s);
+        e.setMonth(e.getMonth() + Math.round((values.termYears ?? 5) * 12));
+        setTermEndDate(e.toISOString().slice(0, 10));
+      }
+    } else {
+      // Snap back to whole years for the slider
+      const rounded = Math.min(10, Math.max(1, Math.round(values.termYears ?? 5)));
+      setValue("termYears", rounded, { shouldDirty: true });
+    }
+    setTermInputMode(mode);
   };
 
   const handleRateTypeChange = (next: RateType) => {
@@ -476,27 +517,80 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
 
         {/* Term */}
         <div className="space-y-3">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center gap-2 flex-wrap">
             <Label htmlFor="termYears">Term</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="termYears"
-                type="number"
-                className="w-16 text-right"
-                onFocus={(e) => e.currentTarget.select()}
-                {...register("termYears", { valueAsNumber: true })}
-              />
-              <span className="text-sm text-muted-foreground">yrs</span>
+            <div className="flex gap-1">
+              <Button
+                type="button"
+                size="sm"
+                variant={termInputMode === "years" ? "default" : "outline"}
+                className="h-7 text-xs"
+                onClick={() => switchTermMode("years")}
+                data-testid="button-term-mode-years"
+              >
+                Years
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={termInputMode === "endDate" ? "default" : "outline"}
+                className="h-7 text-xs"
+                onClick={() => switchTermMode("endDate")}
+                data-testid="button-term-mode-end-date"
+              >
+                End date
+              </Button>
             </div>
           </div>
-          <Slider
-            min={1}
-            max={10}
-            step={1}
-            value={[values.termYears]}
-            onValueChange={([val]) => setValue("termYears", val)}
-            className="py-2"
-          />
+          {termInputMode === "years" ? (
+            <>
+              <div className="flex justify-end items-center gap-2">
+                <Input
+                  id="termYears"
+                  type="number"
+                  className="w-16 text-right"
+                  onFocus={(e) => e.currentTarget.select()}
+                  {...register("termYears", { valueAsNumber: true })}
+                />
+                <span className="text-sm text-muted-foreground">yrs</span>
+              </div>
+              <Slider
+                min={1}
+                max={10}
+                step={1}
+                value={[values.termYears]}
+                onValueChange={([val]) => setValue("termYears", val)}
+                className="py-2"
+              />
+            </>
+          ) : (
+            <div className="space-y-2">
+              <Input
+                type="date"
+                className="w-full sm:w-44 ml-auto"
+                value={termEndDate}
+                onChange={(e) => setTermEndDate(e.target.value)}
+                data-testid="input-term-end-date"
+              />
+              {termEndMonths == null || termEndDate === "" ? (
+                <p className="text-xs text-muted-foreground">Pick the date your term ends.</p>
+              ) : termEndMonths < 1 ? (
+                <p className="text-xs text-destructive">
+                  End date must be at least 1 month after the {isCurrent ? "term" : "loan"} start date.
+                </p>
+              ) : termEndMonths > 120 ? (
+                <p className="text-xs text-destructive">
+                  Terms longer than 10 years aren't supported. Pick an earlier end date.
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground" data-testid="text-term-derived">
+                  Term length: {Math.floor(termEndMonths / 12) > 0 ? `${Math.floor(termEndMonths / 12)} yrs ` : ""}
+                  {termEndMonths % 12 > 0 ? `${termEndMonths % 12} mos` : ""}
+                  {" "}({termEndMonths} months from {isCurrent ? "term" : "loan"} start)
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Payment Frequency */}

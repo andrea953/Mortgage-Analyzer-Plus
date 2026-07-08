@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScenarioState } from "@/pages/Calculator";
-import { formatCurrency, formatPercent } from "@/lib/format";
+import { formatCurrency, formatPercent, formatTermYears } from "@/lib/format";
 import { AnimatedNumber } from "@/components/animated-number";
 import { recurringMonthlyMortgage, sumHousingCosts } from "@/lib/mortgage";
 
@@ -118,7 +118,7 @@ export function ScenarioResults({ summary, scenario }: ScenarioResultsProps) {
 
         <Card className="bg-card">
           <CardContent className="p-4">
-            <h4 className="text-xs text-muted-foreground font-medium mb-1">Term Interest ({scenario.termYears}y)</h4>
+            <h4 className="text-xs text-muted-foreground font-medium mb-1">Term Interest ({formatTermYears(scenario.termYears)})</h4>
             <div className="text-lg font-semibold text-foreground">
               <AnimatedNumber value={summary.termInterest} format={formatCurrency} />
             </div>
@@ -143,7 +143,7 @@ export function ScenarioResults({ summary, scenario }: ScenarioResultsProps) {
               {formatRenewalDate(summary.renewalDate)}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              End of {scenario.termYears}-year term
+              End of {formatTermYears(scenario.termYears)} term
             </p>
           </div>
           <div className="text-right shrink-0">

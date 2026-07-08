@@ -1,7 +1,7 @@
 import React from "react";
 import { ScenarioState } from "@/pages/Calculator";
 import { ScheduleRow, PaymentFrequency, recurringMonthlyMortgage, sumHousingCosts } from "@/lib/mortgage";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatTermYears } from "@/lib/format";
 import modernCentsLogo from "@assets/Big_logo_1777908930945.png";
 
 type Summary = {
@@ -159,7 +159,7 @@ function ScenarioBlock({
           </tr>
           <tr>
             <th>Term</th>
-            <td>{scenario.termYears} years</td>
+            <td>{formatTermYears(scenario.termYears)}</td>
           </tr>
           <tr>
             <th>Payment Frequency</th>
@@ -206,13 +206,13 @@ function ScenarioBlock({
           <div className="ps-cell-value">{formatCurrency(summary.totalInterest)}</div>
         </div>
         <div className="ps-cell">
-          <div className="ps-cell-label">Term Interest ({scenario.termYears}y)</div>
+          <div className="ps-cell-label">Term Interest ({formatTermYears(scenario.termYears)})</div>
           <div className="ps-cell-value">{formatCurrency(summary.termInterest)}</div>
         </div>
         <div className="ps-cell ps-cell-accent">
           <div className="ps-cell-label">Renewal Date</div>
           <div className="ps-cell-value">{fmtMonthYear(summary.renewalDate)}</div>
-          <div className="ps-cell-sub">End of {scenario.termYears}-year term</div>
+          <div className="ps-cell-sub">End of {formatTermYears(scenario.termYears)} term</div>
         </div>
         <div className="ps-cell ps-cell-accent">
           <div className="ps-cell-label">Projected Principal at Renewal</div>

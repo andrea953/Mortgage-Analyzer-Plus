@@ -284,10 +284,22 @@ export function buildSchedule({
   return schedule;
 }
 
+export function addMonthsClamped(date: Date, months: number): Date {
+  const result = new Date(date);
+  const day = result.getDate();
+  result.setDate(1);
+  result.setMonth(result.getMonth() + months);
+  const lastDay = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
+  result.setDate(Math.min(day, lastDay));
+  return result;
+}
+
 export function summarize(schedule: ScheduleRow[], termYears: number, termStartDate?: Date) {
   if (schedule.length === 0) {
-    const fallback = termStartDate ? new Date(termStartDate) : new Date();
-    fallback.setFullYear(fallback.getFullYear() + termYears);
+    const fallback = addMonthsClamped(
+      termStartDate ? new Date(termStartDate) : new Date(),
+      Math.round(termYears * 12),
+    );
     return {
       regularPayment: 0,
       totalPayment: 0,
@@ -311,8 +323,7 @@ export function summarize(schedule: ScheduleRow[], termYears: number, termStartD
   // Renewal date = term start + term years. Prefer the provided termStartDate;
   // fall back to the first payment date when not provided.
   const baseStart = termStartDate ? new Date(termStartDate) : new Date(schedule[0].date);
-  const renewalDate = new Date(baseStart);
-  renewalDate.setFullYear(renewalDate.getFullYear() + termYears);
+  const renewalDate = addMonthsClamped(baseStart, Math.round(termYears * 12));
 
   const termRows = schedule.filter(row => row.date <= renewalDate);
   const termInterest = termRows.reduce((sum, row) => sum + row.interest, 0);

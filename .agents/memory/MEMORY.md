@@ -1,5 +1,6 @@
 - [Mortgage calc form guards](mortgage-calc-rhf-guards.md) — adding a numeric field to scenario-form needs a guard line + setValueAs(0) or clearing it freezes the whole form.
 - [Mortgage calc brand theming](mortgage-calc-theming.md) — brand colors live in index.css tokens (--primary/--ring/--accent/--chart-*); edit BOTH light+dark blocks; keep contrast floors.
+- [Mortgage calc term units](mortgage-calc-term-units.md) — termYears can be fractional (end-date mode); use addMonthsClamped + formatTermYears, never raw setFullYear or raw interpolation.
 - [ScenarioForm one-way dataflow](mortgage-calc-scenario-form-dataflow.md) — form reads parent state only at mount; to push seeded values into inputs, bump its React `key` to remount.
 - [Prime-rate monitor](prime-rate-monitor.md) — scheduled job→DB→api→banner; banner compares live vs CODE default and self-clears on redeploy; pure progressive enhancement.
 - [Generated query hooks](api-zod-query-hooks.md) — orval useGet* hooks need queryKey when passing query options (UseQueryOptions is not Partial); use getGet*QueryKey().
