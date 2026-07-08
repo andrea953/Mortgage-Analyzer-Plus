@@ -212,11 +212,11 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3">
             <div className="flex-1 min-w-0">
               <Label htmlFor="termStartDate">
-                {isCurrent ? "Term Start Date" : "Loan Start Date"}
+                {isCurrent ? "Balance as of Date" : "Loan Start Date"}
               </Label>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {isCurrent
-                  ? "When this term begins (used for renewal date)"
+                  ? "The date your balance applies — treated as the start of your current term (sets the renewal date)"
                   : "When the loan is funded"}
               </p>
             </div>
@@ -238,7 +238,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
               </Label>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {isCurrent
-                  ? "Principal owing at start of this term"
+                  ? "Principal owing as of the date above"
                   : "Original principal at start of term"}
               </p>
             </div>
