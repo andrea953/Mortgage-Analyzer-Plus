@@ -124,10 +124,10 @@ function ScenarioBlock({
         <tbody>
           <tr>
             <th>Mode</th>
-            <td>{scenario.mode === "current" ? "Current balance (existing mortgage)" : "New mortgage"}</td>
+            <td>{scenario.mode === "current" ? "Current balance (existing mortgage)" : "New term"}</td>
           </tr>
           <tr>
-            <th>{scenario.mode === "current" ? "Term Start Date" : "Loan Start Date"}</th>
+            <th>{scenario.mode === "current" ? "Balance as of Date" : "Loan Start Date"}</th>
             <td>{fmtDateLong(startDate)}</td>
           </tr>
           <tr>

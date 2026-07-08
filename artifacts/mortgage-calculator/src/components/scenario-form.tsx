@@ -191,7 +191,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
             onClick={() => setValue("mode", "new" as BalanceMode)}
             aria-pressed={!isCurrent}
           >
-            New mortgage
+            New term
           </Button>
           <Button
             type="button"
