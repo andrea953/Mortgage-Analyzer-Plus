@@ -4,3 +4,4 @@
 - [ScenarioForm one-way dataflow](mortgage-calc-scenario-form-dataflow.md) — form reads parent state only at mount; to push seeded values into inputs, bump its React `key` to remount.
 - [Prime-rate monitor](prime-rate-monitor.md) — scheduled job→DB→api→banner; banner compares live vs CODE default and self-clears on redeploy; pure progressive enhancement.
 - [Generated query hooks](api-zod-query-hooks.md) — orval useGet* hooks need queryKey when passing query options (UseQueryOptions is not Partial); use getGet*QueryKey().
+- [pnpm audit overrides](pnpm-audit-overrides.md) — audit fixes in workspace packages modify the root config; verify nested edges because broad overrides may leave vulnerable lock nodes.
