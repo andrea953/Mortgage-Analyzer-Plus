@@ -40,6 +40,7 @@ type Props = {
   summaryB?: Summary;
   scheduleB?: ScheduleRow[];
   isCompare: boolean;
+  hideOnPrint?: boolean;
   showRenewal?: boolean;
   renewalBalance?: number;
   renewalDate?: Date;
@@ -284,6 +285,7 @@ export function PrintSummary({
   summaryB,
   scheduleB,
   isCompare,
+  hideOnPrint,
   showRenewal,
   renewalBalance,
   renewalDate,
@@ -311,7 +313,10 @@ export function PrintSummary({
     ? renewalOptions!.reduce((m, o) => (o.termEndingBalance < m.termEndingBalance ? o : m), renewalOptions![0])
     : undefined;
   return (
-    <div className="hidden print:block print-summary" data-no-renewal={renewalSection ? undefined : "true"}>
+    <div
+      className={`hidden ${hideOnPrint ? "print:hidden" : "print:block"} print-summary`}
+      data-no-renewal={renewalSection ? undefined : "true"}
+    >
       <div className="ps-fit">
       {/* Header */}
       <div className="ps-header">

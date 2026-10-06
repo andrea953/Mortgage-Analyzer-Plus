@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useGetPrimeRate, getGetPrimeRateQueryKey } from "@workspace/api-client-react";
-import { Moon, Sun, Printer, Calculator as CalculatorIcon, RefreshCw, Pencil, Columns2 } from "lucide-react";
+import { Moon, Sun, Printer, Calculator as CalculatorIcon, RefreshCw, Pencil, Columns2, House } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,6 +13,7 @@ import { buildSchedule, summarize, PaymentFrequency, LumpSumType, Compounding } 
 import { ScenarioComparison } from "@/components/scenario-comparison";
 import { PrintSummary } from "@/components/print-summary";
 import { PrimeRateBanner } from "@/components/PrimeRateBanner";
+import { MortgageAffordability } from "@/components/mortgage-affordability";
 import modernCentsLogo from "@assets/Big_logo_1777908930945.png";
 import {
   RenewalPlanner,
@@ -120,7 +121,7 @@ const defaultScenario: ScenarioState = {
 
 export default function Calculator() {
   const { theme, setTheme } = useTheme();
-  const [tab, setTab] = useState<"calculator" | "renewal">("calculator");
+  const [tab, setTab] = useState<"calculator" | "renewal" | "affordability">("calculator");
   const [isCompare, setIsCompare] = useState(false);
   const [clientName, setClientName] = useState("");
   const [scenarioA, setScenarioA] = useState<ScenarioState>({ ...defaultScenario });
@@ -302,17 +303,19 @@ export default function Calculator() {
             </div>
           </div>
           <div className="flex items-center gap-1 sm:gap-3 shrink-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePrint}
-              className="gap-2 h-8 sm:h-9 px-2 sm:px-3"
-              data-testid="button-print"
-              aria-label="Print Summary"
-            >
-              <Printer className="h-4 w-4" />
-              <span className="hidden md:inline">Print Summary</span>
-            </Button>
+            {tab !== "affordability" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrint}
+                className="gap-2 h-8 sm:h-9 px-2 sm:px-3"
+                data-testid="button-print"
+                aria-label="Print Summary"
+              >
+                <Printer className="h-4 w-4" />
+                <span className="hidden md:inline">Print Summary</span>
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -335,6 +338,7 @@ export default function Calculator() {
         summaryB={isCompare ? summaryB : undefined}
         scheduleB={isCompare ? scheduleB : undefined}
         isCompare={isCompare}
+        hideOnPrint={tab === "affordability"}
         showRenewal={tab === "renewal"}
         renewalBalance={renewalBalance}
         renewalDate={renewalDate}
@@ -368,9 +372,11 @@ export default function Calculator() {
             variable rates. Adjust your loan amount, rate, amortization, payment
             frequency, and lump-sum prepayments to see the impact instantly. Use{" "}
             <span className="font-medium text-foreground">Compare</span> to weigh
-            two scenarios side by side, or the{" "}
+            two scenarios side by side, use the{" "}
             <span className="font-medium text-foreground">Renewal Planner</span> to
-            project your options at the end of a term.
+            project options at the end of a term, or use the{" "}
+            <span className="font-medium text-foreground">Affordability</span> tab
+            for a separate purchase-budget estimate.
           </p>
           <p className="mt-3 text-xs text-muted-foreground/80">
             For estimation purposes only. Actual rates, payments, and terms are set
@@ -380,20 +386,22 @@ export default function Calculator() {
         <div className="mb-4 sm:mb-6">
           <PrimeRateBanner appPrimeRatePct={DEFAULT_PRIME_RATE_PCT} />
         </div>
-        <div className="mb-4 sm:mb-6 flex items-center gap-2 max-w-md">
-          <label htmlFor="client-name" className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-            Prepared for
-          </label>
-          <Input
-            id="client-name"
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
-            placeholder="Client name (appears on PDF)"
-            maxLength={60}
-            data-testid="input-client-name"
-          />
-        </div>
-        <Tabs value={tab} onValueChange={(v) => setTab(v as "calculator" | "renewal")}>
+        {tab !== "affordability" && (
+          <div className="mb-4 sm:mb-6 flex items-center gap-2 max-w-md">
+            <label htmlFor="client-name" className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+              Prepared for
+            </label>
+            <Input
+              id="client-name"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+              placeholder="Client name (appears on PDF)"
+              maxLength={60}
+              data-testid="input-client-name"
+            />
+          </div>
+        )}
+        <Tabs value={tab} onValueChange={(v) => setTab(v as "calculator" | "renewal" | "affordability")}>
           <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <TabsList className="w-full sm:w-auto">
               <TabsTrigger value="calculator" className="gap-2">
@@ -403,6 +411,10 @@ export default function Calculator() {
               <TabsTrigger value="renewal" className="gap-2">
                 <RefreshCw className="h-4 w-4" />
                 Renewal Planner
+              </TabsTrigger>
+              <TabsTrigger value="affordability" className="gap-2">
+                <House className="h-4 w-4" />
+                Affordability
               </TabsTrigger>
             </TabsList>
             {tab === "calculator" && (
@@ -482,6 +494,9 @@ export default function Calculator() {
               options={renewalOptions}
               onChange={setRenewalOptions}
             />
+          </TabsContent>
+          <TabsContent value="affordability" className="mt-0">
+            <MortgageAffordability />
           </TabsContent>
         </Tabs>
       </main>
