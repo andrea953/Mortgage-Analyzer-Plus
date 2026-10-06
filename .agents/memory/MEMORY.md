@@ -5,3 +5,4 @@
 - [Prime-rate monitor](prime-rate-monitor.md) — scheduled job→DB→api→banner; banner compares live vs CODE default and self-clears on redeploy; pure progressive enhancement.
 - [Generated query hooks](api-zod-query-hooks.md) — orval useGet* hooks need queryKey when passing query options (UseQueryOptions is not Partial); use getGet*QueryKey().
 - [pnpm audit overrides](pnpm-audit-overrides.md) — audit fixes in workspace packages modify the root config; verify nested edges because broad overrides may leave vulnerable lock nodes.
+- [Affordability analysis scope](mortgage-affordability-scope.md) — user chose standard Canadian affordability rather than an exact FreshPlan recreation.

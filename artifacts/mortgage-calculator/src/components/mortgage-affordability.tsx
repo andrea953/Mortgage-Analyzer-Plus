@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useForm } from "react-hook-form";
 import { Home, Info, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Form } from "@/components/ui/form";
 import { formatCurrency, formatPercent } from "@/lib/format";
 import {
   computeMortgageAffordability,
@@ -36,6 +38,7 @@ function NumberField({
   onChange,
   step = "100",
   suffix,
+  max,
 }: {
   name: keyof FormValues;
   label: string;
@@ -43,6 +46,7 @@ function NumberField({
   onChange: (value: string) => void;
   step?: string;
   suffix?: string;
+  max?: number;
 }) {
   const id = `affordability-${name}`;
   return (
@@ -53,10 +57,17 @@ function NumberField({
           id={id}
           type="number"
           min="0"
+          max={max}
           step={step}
           value={value}
           onFocus={(event) => event.currentTarget.select()}
-          onChange={(event) => onChange(event.currentTarget.value)}
+          onChange={(event) => {
+            const next = event.currentTarget.value;
+            const number = Number(next);
+            if (next !== "" && number < 0) onChange("0");
+            else if (next !== "" && max !== undefined && number > max) onChange(String(max));
+            else onChange(next);
+          }}
           className={suffix ? "pr-12" : ""}
           data-testid={id}
         />
@@ -107,7 +118,8 @@ function RatioMeter({
 }
 
 export function MortgageAffordability() {
-  const [values, setValues] = useState<FormValues>(initialValues);
+  const form = useForm<FormValues>({ defaultValues: initialValues });
+  const values = form.watch();
   const inputs = useMemo(
     () => Object.fromEntries(
       Object.entries(values).map(([key, value]) => [key, numericValue(value)]),
@@ -116,9 +128,10 @@ export function MortgageAffordability() {
   );
   const result = useMemo(() => computeMortgageAffordability(inputs), [inputs]);
   const update = (key: keyof FormValues, value: string) =>
-    setValues((current) => ({ ...current, [key]: value }));
+    form.setValue(key, value, { shouldDirty: true });
 
   return (
+    <Form {...form}>
     <div className="space-y-6" data-testid="mortgage-affordability-analysis">
       <div className="max-w-3xl">
         <h2 className="text-xl font-semibold tracking-tight">Mortgage Affordability</h2>
@@ -169,6 +182,7 @@ export function MortgageAffordability() {
                   onChange={(value) => update("annualInterestRatePct", value)}
                   step="0.05"
                   suffix="%"
+                  max={25}
                 />
                 <NumberField
                   name="amortizationYears"
@@ -177,6 +191,7 @@ export function MortgageAffordability() {
                   onChange={(value) => update("amortizationYears", value)}
                   step="1"
                   suffix="years"
+                  max={30}
                 />
               </div>
             </section>
@@ -218,6 +233,7 @@ export function MortgageAffordability() {
                   onChange={(value) => update("gdsLimitPct", value)}
                   step="1"
                   suffix="%"
+                  max={100}
                 />
                 <NumberField
                   name="tdsLimitPct"
@@ -226,11 +242,13 @@ export function MortgageAffordability() {
                   onChange={(value) => update("tdsLimitPct", value)}
                   step="1"
                   suffix="%"
+                  max={100}
                 />
               </div>
               <p className="text-xs leading-relaxed text-muted-foreground">
                 Starting assumptions are 39% GDS and 44% TDS. Adjust these to reflect the lender
-                and borrower profile.
+                and borrower profile. GDS measures qualifying housing costs against gross income;
+                TDS includes monthly debt payments as well.
               </p>
             </section>
           </CardContent>
@@ -338,8 +356,9 @@ export function MortgageAffordability() {
           </p>
           <p>
             Mortgage-insurance premiums are estimates and may vary by insurer or eligibility.
-            Provincial sales tax on the premium, where applicable, is not included. A 30-year
-            insured amortization may only be available to eligible borrowers. This is not a
+            Provincial sales tax on the premium, where applicable, and closing costs are not
+            included. Insured amortizations over 25 years assume eligibility as a first-time
+            buyer or purchaser of a new build, and include a 0.20% premium surcharge. This is not a
             pre-approval; lenders may apply different income, debt, and property rules.
           </p>
         </div>
@@ -350,5 +369,6 @@ export function MortgageAffordability() {
         <span>For illustration only. Confirm the figures and eligibility with a mortgage professional.</span>
       </div>
     </div>
+    </Form>
   );
 }

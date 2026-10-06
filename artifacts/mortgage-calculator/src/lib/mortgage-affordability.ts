@@ -1,4 +1,4 @@
-import { computePayment } from "@/lib/mortgage";
+import { computePayment, getPerPeriodRate } from "@/lib/mortgage";
 
 export type MortgageAffordabilityInputs = {
   annualGrossIncome: number;
@@ -46,13 +46,13 @@ export function minimumDownPayment(purchasePrice: number): number {
 export function mortgageInsurancePremiumRatePct(
   purchasePrice: number,
   downPayment: number,
+  amortizationYears = 25,
 ): number {
   if (purchasePrice <= 0 || purchasePrice >= 1_500_000) return 0;
   const loanToValue = (purchasePrice - Math.min(downPayment, purchasePrice)) / purchasePrice;
   if (loanToValue <= 0.8) return 0;
-  if (loanToValue > 0.9) return 4;
-  if (loanToValue > 0.85) return 3.1;
-  return 2.8;
+  const basePremium = loanToValue > 0.9 ? 4 : loanToValue > 0.85 ? 3.1 : 2.8;
+  return basePremium + (amortizationYears > 25 ? 0.2 : 0);
 }
 
 function mortgagePrincipalForMonthlyPayment(
@@ -62,17 +62,17 @@ function mortgagePrincipalForMonthlyPayment(
 ): number {
   if (payment <= 0 || amortizationMonths <= 0) return 0;
   const periods = amortizationMonths;
-  const periodicRate = annualRatePct === 0
-    ? 0
-    : Math.pow(1 + annualRatePct / 200, 2) ** (1 / 12) - 1;
+  const periodicRate = getPerPeriodRate(annualRatePct, "Monthly", "semi-annual");
   if (periodicRate === 0) return payment * periods;
   return payment * (1 - Math.pow(1 + periodicRate, -periods)) / periodicRate;
 }
 
-function financingAtPrice(purchasePrice: number, downPayment: number) {
+function financingAtPrice(purchasePrice: number, downPayment: number, amortizationYears: number) {
   const downPaymentUsed = Math.min(downPayment, purchasePrice);
   const baseMortgage = Math.max(0, purchasePrice - downPaymentUsed);
-  const insurancePremiumRatePct = mortgageInsurancePremiumRatePct(purchasePrice, downPaymentUsed);
+  const insurancePremiumRatePct = mortgageInsurancePremiumRatePct(
+    purchasePrice, downPaymentUsed, amortizationYears,
+  );
   const insurancePremium = baseMortgage * insurancePremiumRatePct / 100;
   return {
     downPaymentUsed,
@@ -91,7 +91,7 @@ export function computeMortgageAffordability(
   const downPayment = Math.max(0, inputs.downPayment || 0);
   const annualInterestRatePct = Math.min(25, Math.max(0, inputs.annualInterestRatePct || 0));
   const amortizationMonths = Math.round(
-    Math.min(40, Math.max(1, inputs.amortizationYears || 25)) * 12,
+    Math.min(30, Math.max(0, inputs.amortizationYears || 0)) * 12,
   );
   const propertyTaxMonthly = Math.max(0, inputs.propertyTaxMonthly || 0);
   const heatingMonthly = Math.max(0, inputs.heatingMonthly || 0);
@@ -116,13 +116,13 @@ export function computeMortgageAffordability(
     amortizationMonths,
   );
 
-  const inputAllowsMortgage = grossMonthlyIncome > 0 &&
+  const inputAllowsMortgage = grossMonthlyIncome > 0 && amortizationMonths > 0 &&
     availableHousingBudget >= monthlyHousingCostsBeforeMortgage;
   const canFinancePrice = (purchasePrice: number) => {
     if (!inputAllowsMortgage || purchasePrice <= 0) return false;
     const downPaymentUsed = Math.min(downPayment, purchasePrice);
     if (downPaymentUsed + 0.005 < minimumDownPayment(purchasePrice)) return false;
-    const financing = financingAtPrice(purchasePrice, downPaymentUsed);
+    const financing = financingAtPrice(purchasePrice, downPaymentUsed, amortizationMonths / 12);
     return financing.insuredMortgage <= maxMortgageWithInsurance + 0.005;
   };
 
@@ -135,7 +135,7 @@ export function computeMortgageAffordability(
   }
 
   const maxPurchasePrice = Math.floor(low);
-  const finalFinancing = financingAtPrice(maxPurchasePrice, downPayment);
+  const finalFinancing = financingAtPrice(maxPurchasePrice, downPayment, amortizationMonths / 12);
   const insuredMortgageAtMax = finalFinancing.insuredMortgage;
   const qualifyingPaymentAtMax = computePayment({
     principal: insuredMortgageAtMax,

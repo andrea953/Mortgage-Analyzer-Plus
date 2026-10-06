@@ -403,7 +403,7 @@ export default function Calculator() {
         )}
         <Tabs value={tab} onValueChange={(v) => setTab(v as "calculator" | "renewal" | "affordability")}>
           <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <TabsList className="w-full sm:w-auto">
+            <TabsList className="w-full sm:w-auto h-auto flex-wrap">
               <TabsTrigger value="calculator" className="gap-2">
                 <CalculatorIcon className="h-4 w-4" />
                 Calculator
@@ -412,7 +412,7 @@ export default function Calculator() {
                 <RefreshCw className="h-4 w-4" />
                 Renewal Planner
               </TabsTrigger>
-              <TabsTrigger value="affordability" className="gap-2">
+              <TabsTrigger value="affordability" className="gap-2" data-testid="tab-affordability">
                 <House className="h-4 w-4" />
                 Affordability
               </TabsTrigger>
@@ -495,7 +495,7 @@ export default function Calculator() {
               onChange={setRenewalOptions}
             />
           </TabsContent>
-          <TabsContent value="affordability" className="mt-0">
+          <TabsContent value="affordability" forceMount className={tab === "affordability" ? "mt-0" : "hidden"}>
             <MortgageAffordability />
           </TabsContent>
         </Tabs>
