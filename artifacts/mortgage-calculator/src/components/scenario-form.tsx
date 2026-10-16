@@ -40,6 +40,7 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
   const [helperPayment, setHelperPayment] = useState("");
   const [termInputMode, setTermInputMode] = useState<"years" | "endDate">("years");
   const [termEndDate, setTermEndDate] = useState("");
+  const [housingCostInputUnit, setHousingCostInputUnit] = useState<"monthly" | "annual">("monthly");
 
   useEffect(() => {
     const sub = form.watch((v) => {
@@ -728,11 +729,41 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
 
         {/* Other Housing Costs */}
         <div className="space-y-3 pt-4 border-t border-border">
-          <div>
-            <Label>Other Monthly Housing Costs</Label>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Recurring ownership costs beyond the mortgage — for a total cost-of-ownership picture
-            </p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <Label>Other Housing Costs</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Recurring ownership costs beyond the mortgage
+              </p>
+            </div>
+            <div
+              role="group"
+              aria-label="Housing cost entry period"
+              className="flex shrink-0 rounded-md border border-input p-0.5"
+            >
+              <Button
+                type="button"
+                size="sm"
+                variant={housingCostInputUnit === "monthly" ? "default" : "ghost"}
+                className="h-7 rounded-sm px-2 text-xs"
+                aria-pressed={housingCostInputUnit === "monthly"}
+                onClick={() => setHousingCostInputUnit("monthly")}
+                data-testid="button-housing-cost-monthly"
+              >
+                Monthly
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={housingCostInputUnit === "annual" ? "default" : "ghost"}
+                className="h-7 rounded-sm px-2 text-xs"
+                aria-pressed={housingCostInputUnit === "annual"}
+                onClick={() => setHousingCostInputUnit("annual")}
+                data-testid="button-housing-cost-annual"
+              >
+                Annual
+              </Button>
+            </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {([
@@ -751,12 +782,27 @@ export function ScenarioForm({ state, onChange }: ScenarioFormProps) {
                     id={key}
                     type="number"
                     min={0}
-                    step={10}
+                    step={housingCostInputUnit === "annual" ? 120 : 10}
                     placeholder="0"
                     className="pl-7 text-right h-9"
                     {...register(key, {
                       setValueAs: (v) => (v === "" || v === null || isNaN(Number(v)) ? 0 : Number(v)),
                     })}
+                    value={
+                      housingCostInputUnit === "annual"
+                        ? (values[key] || 0) * 12
+                        : values[key] || 0
+                    }
+                    onFocus={(event) => event.currentTarget.select()}
+                    onChange={(event) => {
+                      const entered = Number(event.currentTarget.value) || 0;
+                      setValue(
+                        key,
+                        housingCostInputUnit === "annual" ? entered / 12 : entered,
+                        { shouldDirty: true },
+                      );
+                    }}
+                    data-testid={`input-${key}`}
                   />
                 </div>
               </div>

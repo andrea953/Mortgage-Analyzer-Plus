@@ -3,6 +3,7 @@ import { useGetPrimeRate, getGetPrimeRateQueryKey } from "@workspace/api-client-
 import { Moon, Sun, Printer, Calculator as CalculatorIcon, RefreshCw, Pencil, Columns2, House } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTheme } from "@/components/theme-provider";
 import { ScenarioForm } from "@/components/scenario-form";
@@ -97,7 +98,7 @@ const defaultScenario: ScenarioState = {
   mode: "new",
   termStartDate: todayIso(),
   principal: 500000,
-  annualRatePct: 5.25,
+  annualRatePct: 4.4,
   rateType: "fixed",
   primeRatePct: DEFAULT_PRIME_RATE_PCT,
   spreadPct: 0,
@@ -124,6 +125,7 @@ export default function Calculator() {
   const [tab, setTab] = useState<"calculator" | "renewal" | "affordability">("calculator");
   const [isCompare, setIsCompare] = useState(false);
   const [clientName, setClientName] = useState("");
+  const [includeFullAmortization, setIncludeFullAmortization] = useState(false);
   const [scenarioA, setScenarioA] = useState<ScenarioState>({ ...defaultScenario });
   const [scenarioB, setScenarioB] = useState<ScenarioState>({ 
     ...defaultScenario, 
@@ -229,6 +231,14 @@ export default function Calculator() {
       return;
     }
 
+    if (includeFullAmortization && tab === "calculator") {
+      root.classList.remove("ps-scaled");
+      root.style.removeProperty("--print-scale");
+      root.style.removeProperty("--print-h");
+      requestAnimationFrame(() => window.print());
+      return;
+    }
+
     // Letter page content area at 96dpi with 0.5in margins: 7.5in x 10in.
     // PAGE_H trimmed slightly for rounding / engine variance safety.
     const PAGE_W = 720;
@@ -303,6 +313,22 @@ export default function Calculator() {
             </div>
           </div>
           <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+            {tab === "calculator" && (
+              <label
+                htmlFor="include-full-amortization"
+                className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer"
+              >
+                <Checkbox
+                  id="include-full-amortization"
+                  checked={includeFullAmortization}
+                  onCheckedChange={(checked) => setIncludeFullAmortization(checked === true)}
+                  aria-label="Include the full payment-by-payment amortization schedule when printing"
+                  data-testid="checkbox-full-amortization"
+                />
+                <span className="hidden sm:inline">Full payment schedule</span>
+                <span className="sm:hidden">Full schedule</span>
+              </label>
+            )}
             {tab !== "affordability" && (
               <Button
                 variant="outline"
@@ -310,10 +336,16 @@ export default function Calculator() {
                 onClick={handlePrint}
                 className="gap-2 h-8 sm:h-9 px-2 sm:px-3"
                 data-testid="button-print"
-                aria-label="Print Summary"
+                aria-label={
+                  includeFullAmortization && tab === "calculator"
+                    ? "Print Detailed Report"
+                    : "Print Summary"
+                }
               >
                 <Printer className="h-4 w-4" />
-                <span className="hidden md:inline">Print Summary</span>
+                <span className="hidden md:inline">
+                  {includeFullAmortization && tab === "calculator" ? "Print Detailed Report" : "Print Summary"}
+                </span>
               </Button>
             )}
             <Button
@@ -339,6 +371,7 @@ export default function Calculator() {
         scheduleB={isCompare ? scheduleB : undefined}
         isCompare={isCompare}
         hideOnPrint={tab === "affordability"}
+        includeFullAmortization={includeFullAmortization && tab === "calculator"}
         showRenewal={tab === "renewal"}
         renewalBalance={renewalBalance}
         renewalDate={renewalDate}

@@ -312,6 +312,40 @@
     margin-top: 0.6rem;
   }
 
+  .print-summary[data-full-schedule="true"] {
+    height: auto !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+  .print-summary[data-full-schedule="true"] .ps-compare {
+    display: block;
+  }
+  .print-summary[data-full-schedule="true"] .ps-full-schedule {
+    break-before: page;
+    page-break-before: always;
+  }
+  .print-summary .ps-schedule-table {
+    table-layout: fixed;
+    font-size: 7.5px;
+  }
+  .print-summary .ps-schedule-table th,
+  .print-summary .ps-schedule-table td {
+    padding: 2px 3px;
+    overflow-wrap: anywhere;
+  }
+  .print-summary .ps-schedule-table thead {
+    display: table-header-group;
+  }
+  .print-summary .ps-schedule-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .print-summary .ps-housing-total th,
+  .print-summary .ps-housing-total td {
+    font-weight: 700;
+    border-top: 1px solid #cbd5e1;
+  }
+
   /* Auto-fit: JS measures the rendered summary and sets --print-scale / --print-h
      so the whole report always shrinks to fit exactly one Letter page. */
   .print-summary.ps-scaled {

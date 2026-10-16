@@ -41,6 +41,7 @@ type Props = {
   scheduleB?: ScheduleRow[];
   isCompare: boolean;
   hideOnPrint?: boolean;
+  includeFullAmortization?: boolean;
   showRenewal?: boolean;
   renewalBalance?: number;
   renewalDate?: Date;
@@ -75,11 +76,13 @@ function ScenarioBlock({
   scenario,
   summary,
   schedule,
+  includeFullAmortization = false,
 }: {
   label?: string;
   scenario: ScenarioState;
   summary: Summary;
   schedule: ScheduleRow[];
+  includeFullAmortization?: boolean;
 }) {
   const startDate = parseStartLocal(scenario.termStartDate);
   const totalAmortMonths = scenario.amortizationYears * 12 + scenario.amortizationMonths;
@@ -117,6 +120,14 @@ function ScenarioBlock({
   });
   const otherHousingMonthly = sumHousingCosts(scenario);
   const totalMonthlyHousing = monthlyMortgageEquiv + otherHousingMonthly;
+  const housingCostRows = [
+    { label: "Property taxes", amount: scenario.propertyTaxMonthly },
+    { label: "Condo / strata fees", amount: scenario.condoFeesMonthly },
+    { label: "Maintenance", amount: scenario.maintenanceMonthly },
+    { label: "Utilities", amount: scenario.utilitiesMonthly },
+    { label: "Home insurance", amount: scenario.insuranceMonthly },
+    { label: "Other", amount: scenario.otherMonthly },
+  ];
 
   return (
     <div className="ps-scenario">
@@ -232,11 +243,45 @@ function ScenarioBlock({
             <div className="ps-cell-label">Total Monthly Housing Cost</div>
             <div className="ps-cell-value">{formatCurrency(totalMonthlyHousing)}</div>
             <div className="ps-cell-sub">
-              Mortgage {formatCurrency(monthlyMortgageEquiv)} + other {formatCurrency(otherHousingMonthly)} · ≈ {formatCurrency(totalMonthlyHousing * 12)}/yr
+              Mortgage {formatCurrency(monthlyMortgageEquiv)} + housing costs {formatCurrency(otherHousingMonthly)} · {formatCurrency(totalMonthlyHousing * 12)}/yr
             </div>
           </div>
         )}
       </div>
+
+      {otherHousingMonthly > 0 && (
+        <>
+          <h3 className="ps-h3">Monthly Housing Cost Breakdown</h3>
+          <table className="ps-table ps-table-compact ps-housing-table">
+            <thead>
+              <tr>
+                <th>Cost</th>
+                <th className="ps-num">Monthly</th>
+                <th className="ps-num">Annual</th>
+              </tr>
+            </thead>
+            <tbody>
+              {housingCostRows.map(({ label: costLabel, amount }) => (
+                <tr key={costLabel}>
+                  <td>{costLabel}</td>
+                  <td className="ps-num">{formatCurrency(amount)}</td>
+                  <td className="ps-num">{formatCurrency(amount * 12)}</td>
+                </tr>
+              ))}
+              <tr className="ps-housing-total">
+                <th>Other housing costs total</th>
+                <td className="ps-num">{formatCurrency(otherHousingMonthly)}</td>
+                <td className="ps-num">{formatCurrency(otherHousingMonthly * 12)}</td>
+              </tr>
+              <tr className="ps-housing-total">
+                <th>Mortgage + housing costs</th>
+                <td className="ps-num">{formatCurrency(totalMonthlyHousing)}</td>
+                <td className="ps-num">{formatCurrency(totalMonthlyHousing * 12)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </>
+      )}
 
       {/* Year-end snapshot */}
       {yearRows.length > 0 && (
@@ -272,6 +317,40 @@ function ScenarioBlock({
           </table>
         </>
       )}
+
+      {includeFullAmortization && schedule.length > 0 && (
+        <section className="ps-full-schedule">
+          <h3 className="ps-h3">Full Payment-by-Payment Amortization Schedule</h3>
+          <table className="ps-table ps-table-compact ps-schedule-table">
+            <thead>
+              <tr>
+                <th>Payment date</th>
+                <th className="ps-num">Starting balance</th>
+                <th className="ps-num">Payment</th>
+                <th className="ps-num">Interest</th>
+                <th className="ps-num">Regular principal</th>
+                <th className="ps-num">Extra</th>
+                <th className="ps-num">Lump sum</th>
+                <th className="ps-num">Ending balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              {schedule.map((row) => (
+                <tr key={row.n}>
+                  <td>{row.date.toLocaleDateString("en-CA", { year: "numeric", month: "2-digit", day: "2-digit" })}</td>
+                  <td className="ps-num">{formatCurrency(row.beginningBalance)}</td>
+                  <td className="ps-num">{formatCurrency(row.payment)}</td>
+                  <td className="ps-num">{formatCurrency(row.interest)}</td>
+                  <td className="ps-num">{formatCurrency(row.principal)}</td>
+                  <td className="ps-num">{formatCurrency(row.extra)}</td>
+                  <td className="ps-num">{formatCurrency(row.lumpSum)}</td>
+                  <td className="ps-num">{formatCurrency(row.endingBalance)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
     </div>
   );
 }
@@ -286,6 +365,7 @@ export function PrintSummary({
   scheduleB,
   isCompare,
   hideOnPrint,
+  includeFullAmortization = false,
   showRenewal,
   renewalBalance,
   renewalDate,
@@ -316,6 +396,7 @@ export function PrintSummary({
     <div
       className={`hidden ${hideOnPrint ? "print:hidden" : "print:block"} print-summary`}
       data-no-renewal={renewalSection ? undefined : "true"}
+      data-full-schedule={includeFullAmortization ? "true" : undefined}
     >
       <div className="ps-fit">
       {/* Header */}
@@ -352,12 +433,14 @@ export function PrintSummary({
             scenario={scenarioA}
             summary={summaryA}
             schedule={scheduleA}
+            includeFullAmortization={includeFullAmortization}
           />
           <ScenarioBlock
             label={scenarioB.title?.trim() || "Scenario B"}
             scenario={scenarioB}
             summary={summaryB}
             schedule={scheduleB}
+            includeFullAmortization={includeFullAmortization}
           />
           <div className="ps-diff">
             <h3 className="ps-h3">
@@ -390,7 +473,12 @@ export function PrintSummary({
           </div>
         </div>
       ) : (
-        <ScenarioBlock scenario={scenarioA} summary={summaryA} schedule={scheduleA} />
+        <ScenarioBlock
+          scenario={scenarioA}
+          summary={summaryA}
+          schedule={scheduleA}
+          includeFullAmortization={includeFullAmortization}
+        />
       )}
 
       {/* Renewal Planner section */}
