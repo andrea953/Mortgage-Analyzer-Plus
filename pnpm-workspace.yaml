@@ -68,6 +68,7 @@ overrides:
   baseline-browser-mapping@>=2.0.0 <2.11.0: 2.11.0
   body-parser@>=2.0.0 <2.3.0: 2.3.0
   brace-expansion@>=2.0.0 <2.1.4: 2.1.4
+  brace-expansion@>=5.0.0 <5.0.12: 5.0.12
   browserslist@<=4.28.6: 4.28.7
   esbuild: 0.28.1
   esbuild>@esbuild/aix-ppc64: '-'
@@ -96,7 +97,8 @@ overrides:
   esbuild>@esbuild/win32-ia32: '-'
   esbuild>@esbuild/win32-x64: '-'
   esbuild@>=0.27.3 <0.28.1: 0.28.1
-  fast-uri@>=3.0.0 <3.1.6: 3.1.6
+  fast-copy@>=4.0.0 <4.3.1: 4.3.1
+  fast-uri@>=3.0.0 <3.1.9: 3.1.9
   js-yaml@>=4.0.0 <4.3.2: 4.3.2
   lightningcss>lightningcss-android-arm64: '-'
   lightningcss>lightningcss-darwin-arm64: '-'
@@ -117,6 +119,7 @@ overrides:
   picomatch@<2.3.2: 2.3.2
   picomatch@>=4.0.0 <4.0.4: 4.0.7
   postcss@<=8.5.22: 8.5.23
+  postcss-selector-parser@>=6.0.0 <6.1.5: 6.1.5
   qs@>=2.2.5 <6.16.0: 6.16.0
   rollup>@rollup/rollup-android-arm-eabi: '-'
   rollup>@rollup/rollup-android-arm64: '-'
@@ -142,4 +145,5 @@ overrides:
   rollup>@rollup/rollup-win32-ia32-msvc: '-'
   rollup>@rollup/rollup-win32-x64-gnu: '-'
   rollup>@rollup/rollup-win32-x64-msvc: '-'
+  source-map-js@>=1.0.0 <1.2.2: 1.2.2
   yaml@>=2.0.0 <2.8.3: 2.8.3
