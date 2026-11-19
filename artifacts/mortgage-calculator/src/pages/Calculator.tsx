@@ -224,7 +224,11 @@ export default function Calculator() {
   );
 
   const handlePrint = () => {
-    const root = document.querySelector(".print-summary") as HTMLElement | null;
+    const root = document.querySelector(
+      tab === "affordability"
+        ? ".affordability-print-summary"
+        : ".print-summary:not(.affordability-print-summary)",
+    ) as HTMLElement | null;
     const fit = root?.querySelector(".ps-fit") as HTMLElement | null;
     if (!root || !fit) {
       window.print();
@@ -329,25 +333,23 @@ export default function Calculator() {
                 <span className="sm:hidden">Full schedule</span>
               </label>
             )}
-            {tab !== "affordability" && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePrint}
-                className="gap-2 h-8 sm:h-9 px-2 sm:px-3"
-                data-testid="button-print"
-                aria-label={
-                  includeFullAmortization && tab === "calculator"
-                    ? "Print Detailed Report"
-                    : "Print Summary"
-                }
-              >
-                <Printer className="h-4 w-4" />
-                <span className="hidden md:inline">
-                  {includeFullAmortization && tab === "calculator" ? "Print Detailed Report" : "Print Summary"}
-                </span>
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePrint}
+              className="gap-2 h-8 sm:h-9 px-2 sm:px-3"
+              data-testid="button-print"
+              aria-label={
+                includeFullAmortization && tab === "calculator"
+                  ? "Print Detailed Report"
+                  : "Print Summary"
+              }
+            >
+              <Printer className="h-4 w-4" />
+              <span className="hidden md:inline">
+                {includeFullAmortization && tab === "calculator" ? "Print Detailed Report" : "Print Summary"}
+              </span>
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -419,21 +421,19 @@ export default function Calculator() {
         <div className="mb-4 sm:mb-6">
           <PrimeRateBanner appPrimeRatePct={DEFAULT_PRIME_RATE_PCT} />
         </div>
-        {tab !== "affordability" && (
-          <div className="mb-4 sm:mb-6 flex items-center gap-2 max-w-md">
-            <label htmlFor="client-name" className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-              Prepared for
-            </label>
-            <Input
-              id="client-name"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              placeholder="Client name (appears on PDF)"
-              maxLength={60}
-              data-testid="input-client-name"
-            />
-          </div>
-        )}
+        <div className="mb-4 sm:mb-6 flex items-center gap-2 max-w-md">
+          <label htmlFor="client-name" className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+            Prepared for
+          </label>
+          <Input
+            id="client-name"
+            value={clientName}
+            onChange={(e) => setClientName(e.target.value)}
+            placeholder="Client name (appears on PDF)"
+            maxLength={60}
+            data-testid="input-client-name"
+          />
+        </div>
         <Tabs value={tab} onValueChange={(v) => setTab(v as "calculator" | "renewal" | "affordability")}>
           <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <TabsList className="w-full sm:w-auto h-auto flex-wrap">
@@ -529,7 +529,7 @@ export default function Calculator() {
             />
           </TabsContent>
           <TabsContent value="affordability" forceMount className={tab === "affordability" ? "mt-0" : "hidden"}>
-            <MortgageAffordability />
+            <MortgageAffordability clientName={clientName} />
           </TabsContent>
         </Tabs>
       </main>

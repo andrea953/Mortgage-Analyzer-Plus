@@ -10,6 +10,7 @@ import {
   computeMortgageAffordability,
   MortgageAffordabilityInputs,
 } from "@/lib/mortgage-affordability";
+import { AffordabilityPrintSummary } from "@/components/affordability-print-summary";
 
 type FormValues = Record<keyof MortgageAffordabilityInputs, string>;
 
@@ -117,7 +118,7 @@ function RatioMeter({
   );
 }
 
-export function MortgageAffordability() {
+export function MortgageAffordability({ clientName = "" }: { clientName?: string }) {
   const form = useForm<FormValues>({ defaultValues: initialValues });
   const values = form.watch();
   const inputs = useMemo(
@@ -133,6 +134,7 @@ export function MortgageAffordability() {
   return (
     <Form {...form}>
     <div className="space-y-6" data-testid="mortgage-affordability-analysis">
+      <AffordabilityPrintSummary clientName={clientName} inputs={inputs} result={result} />
       <div className="max-w-3xl">
         <h2 className="text-xl font-semibold tracking-tight">Mortgage Affordability</h2>
         <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
