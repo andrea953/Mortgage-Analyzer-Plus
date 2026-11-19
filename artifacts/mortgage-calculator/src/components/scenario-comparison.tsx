@@ -15,6 +15,7 @@ type ScenarioComparisonProps = {
 export function ScenarioComparison({ scenarioA, summaryA, scenarioB, summaryB }: ScenarioComparisonProps) {
   const interestDiff = summaryA.totalInterest - summaryB.totalInterest;
   const paymentDiff = summaryA.totalPayment - summaryB.totalPayment;
+  const samePaymentFrequency = scenarioA.frequency === scenarioB.frequency;
   const payoffMonthsDiff = summaryA.payoffMonths - summaryB.payoffMonths;
 
   const getDiffIcon = (diff: number, invert = false) => {
@@ -52,13 +53,37 @@ export function ScenarioComparison({ scenarioA, summaryA, scenarioB, summaryB }:
             {interestDiff === 0 && <span className="text-muted-foreground font-medium">Same interest</span>}
           </div>
 
-          <div className="p-6 flex flex-col items-center justify-center text-center">
-            <p className="text-sm font-medium text-muted-foreground mb-2">Payment Size ({scenarioB.frequency})</p>
-            <div className={`text-2xl font-bold flex items-center gap-2 ${paymentDiff > 0 ? 'text-green-500' : paymentDiff < 0 ? 'text-red-500' : 'text-foreground'}`}>
-              <AnimatedNumber value={Math.abs(paymentDiff)} format={formatCurrency} />
-              {paymentDiff !== 0 && (paymentDiff > 0 ? <ArrowDown className="w-5 h-5 text-green-500" /> : <ArrowUp className="w-5 h-5 text-red-500" />)}
+          <div className="p-4 sm:p-6">
+            <p className="text-sm font-medium text-muted-foreground mb-3 text-center">Mortgage Payment</p>
+            <div className="space-y-3">
+              {[{ scenario: scenarioA, summary: summaryA, key: "a" }, { scenario: scenarioB, summary: summaryB, key: "b" }].map(({ scenario, summary, key }) => (
+                <div
+                  key={key}
+                  data-testid={`scenario-payment-${key}`}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border/70 bg-background/70 px-3 py-2.5"
+                >
+                  <span className="min-w-0 text-sm text-muted-foreground">
+                    <span className="block truncate font-medium text-foreground">{scenario.title?.trim() || `Scenario ${key.toUpperCase()}`}</span>
+                    <span className="text-xs">{scenario.frequency} payment</span>
+                  </span>
+                  <span className="shrink-0 text-lg font-bold tabular-nums text-foreground">
+                    <AnimatedNumber value={summary.totalPayment} format={formatCurrency} />
+                  </span>
+                </div>
+              ))}
+              {samePaymentFrequency ? (
+                <div className="flex items-center justify-center gap-2 pt-1 text-sm text-muted-foreground" data-testid="text-payment-difference">
+                  Difference: <span className={`font-semibold tabular-nums ${paymentDiff > 0 ? "text-green-500" : paymentDiff < 0 ? "text-red-500" : "text-foreground"}`}>
+                    <AnimatedNumber value={Math.abs(paymentDiff)} format={formatCurrency} />
+                  </span>
+                  {paymentDiff !== 0 && (paymentDiff > 0 ? <ArrowDown className="h-4 w-4 text-green-500" aria-label="Scenario B payment is lower" /> : <ArrowUp className="h-4 w-4 text-red-500" aria-label="Scenario B payment is higher" />)}
+                </div>
+              ) : (
+                <p className="pt-1 text-center text-xs text-muted-foreground">
+                  Different payment frequencies; compare each amount above.
+                </p>
+              )}
             </div>
-            <span className="text-sm text-muted-foreground mt-1">per period</span>
           </div>
 
           <div className="p-6 flex flex-col items-center justify-center text-center">
