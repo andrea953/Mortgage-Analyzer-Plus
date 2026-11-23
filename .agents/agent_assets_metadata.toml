@@ -6,3 +6,18 @@ id = "4ZCEAPCgOr4mPnjE9OqGf"
 uri = "file://artifacts/mortgage-calculator/docs/RUNBOOK-prime-rate.md"
 type = "text"
 title = "Prime Rate Update Runbook"
+logical_id = "59fb837e-4f04-4bd4-a434-e72b7f0499a9"
+
+[[outputs]]
+id = "oX3OchdC_c8_2F-91H4RZ"
+uri = "file://generated-artifacts/mortgage-calculator-project.zip"
+type = "unspecified"
+title = "Mortgage Calculator Project ZIP"
+description = "Source and workspace configuration for the full mortgage calculator project. Excludes installed dependencies, build output, and environment files."
+logical_id = "ab6e7254-e91c-4be2-b78e-ae20f1e675ba"
+content_hash = "sha256:803c0d27064d2a38d07a4d84df723ac8fe8b37d2dba5481ef435ebc4b20c57cd"
+size = 933827
+mtime_ms = 1795446200414
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:832df1b5-eb85-404c-b98d-892fc0c51b6e/ab6e7254-e91c-4be2-b78e-ae20f1e675ba/a2325590-bad4-4388-9715-e2c25d2379ed"
+storage_version_token = "1795446211492362"
+content_type = "application/octet-stream"
